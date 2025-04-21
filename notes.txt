@@ -1,0 +1,36 @@
+# Meeting Notes
+
+## User Roles:
+- Super Admin
+- Company Admin
+- Parents
+- Teacher
+
+Company admin will create teachers.
+
+Parent will create children.
+
+Parent will create guardians and each guardian will have a code. This code will be used to for check in and checkout.
+
+Chat will be available from booking to checkout.
+
+Overtime charges will be applied at the time of the checkout. Two values will be assigned for whether the checkout was within the operational time or not.
+
+The Company admin will set price for sessions (hours) but the super admin will create the packages. The packages will be created against each company and the company will request the super admin to create these outside the platform.
+
+The super admin will set commission for each company while creating the company.
+
+There will be somewhat an e-wallet for each company which will accumulate all the amount that the company has earned. The super admin will clear these dues outside the platform and manually set the value.
+
+
+
+# Queries
+How are packages created? What is the criteria and what are the field included when creating a package; how do these fields affect the checkout process?
+- Three fields will be used to create the packages: name, hours and price. These hours will be deducted from the bought packages upon checkout.
+
+Will the parent be clearing his negative balance on his next checkout? We will keep an option for the company admin to do so as well.
+
+
+API Key: wH8nyXlU97f8dAzqBPwLZ2bDR8a7BILQpAX7J2vCgglKljmW
+API Secret: Nh0zsXpVCOhQU7rJnA1F4peU8woD6APWbcMe2ggvl2FtTwKrCMWVPoFXfBtHxpEg
+Host URL: https://connect-cert.fiservapis.com/ch/

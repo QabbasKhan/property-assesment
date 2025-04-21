@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f6f6f6;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .content {
+        padding: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <%- include('../partials/header') %>
+
+      <div class="content">
+        <p>Hi <%= firstName %>,</p>
+
+        <p>
+          A match has been marked as completed. Please view the video and
+          evaluation report below.
+        </p>
+
+        <p>
+          Video URL:
+          <a href="<%= payload.videoURL %>"><%= payload.videoURL %></a>
+        </p>
+
+        <p>
+          Report URL:
+          <a href="<%= payload.reportURL %>"><%= payload.reportURL %></a>
+        </p>
+
+        <p>
+          For your security, do not share this email with anyone. If you
+          continue to experience issues or need further assistance, please
+          contact our support team.
+        </p>
+        <p>Thank you,</p>
+        <p>Next Generation Team</p>
+      </div>
+
+      <%- include('../partials/footer') %>
+    </div>
+  </body>
+</html>
