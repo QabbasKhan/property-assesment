@@ -1,10 +1,6 @@
 {
-  "name": "child-care-backend",
+  "name": "property-assesment",
   "version": "0.0.1",
-  "description": "The backend server for Child Care App created using NestJS",
-  "author": "Node Night Team",
-  "private": true,
-  "license": "UNLICENSED",
   "engines": {
     "node": ">=22",
     "npm": ">=10"

@@ -107,6 +107,9 @@ export class Analytics extends Document {
   occupancy10: number;
 
   @Prop({ required: true, min: 0, max: 100 })
+  purchase_cap_rate: number;
+
+  @Prop({ required: true, min: 0, max: 100 })
   year_5_cap_rate: number;
 
   @Prop({ required: true, min: 0, max: 100 })

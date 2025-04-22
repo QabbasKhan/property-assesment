@@ -71,16 +71,17 @@ export class CreateAnalyticsDto {
   @Type(() => Number)
   @IsNumber()
   first_month_principal_and_intr_payment: number;
-
+  
+  @Type(() => Number)
+  @IsOptional()
+  @IsNumber()
+  bank_fee_and_closing_cost: number;
+  
   @Type(() => Number)
   @IsOptional()
   @IsNumber()
   reserved_amount: number;
 
-  @Type(() => Number)
-  @IsOptional()
-  @IsNumber()
-  bank_fee_and_closing_cost: number;
 
   @Type(() => Number)
   @IsNumber()
@@ -156,6 +157,12 @@ export class CreateAnalyticsDto {
   occupancy9: number;
   @IsNumber()
   occupancy10: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  purchase_cap_rate: number;
 
   @Type(() => Number)
   @IsNumber()

@@ -131,7 +131,7 @@ export function calculateRemainingMortgageBalance(
 }
 
 //------------------helpers----------------------//
-function calculateOriginalLoanPayments(
+export function calculateOriginalLoanPayments(
   baseMonthlyPayment: number,
   interestOnlyMonths: number,
   firstPaymentMonth: number,
@@ -341,37 +341,37 @@ export function generateRefinanceCalculations(
     if (month <= 37) {
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[2].realizedNoi);
-      value = NOI.div(capRatePercent);
+      value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
     } else if (month <= 60) {
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[3].realizedNoi);
       console.log(month, NOI);
-      value = NOI.div(capRatePercent);
+      value = NOI.div(capRatePercent).toDecimalPlaces(0);
     } else if (month <= 84) {
-      capRatePercent = capRate.div(100); // convert to decimal
+      capRatePercent = capRate.div(100) // convert to decimal
       NOI = new Decimal(NOIs[5].realizedNoi);
-      value = NOI.div(capRatePercent);
+      value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
     } else if (month <= 120) {
-      capRatePercent = capRate.div(100); // convert to decimal
+      capRatePercent = capRate.div(100) // convert to decimal
       NOI = new Decimal(NOIs[8].realizedNoi);
-      value = NOI.div(capRatePercent);
+      value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
     } else {
-      capRatePercent = capRate.div(100); // convert to decimal
+      capRatePercent = capRate.div(100) // convert to decimal
       NOI = new Decimal(NOIs[9].realizedNoi);
-      value = NOI.div(capRatePercent);
+      value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
     }
 
-    const mortgage = value.mul(LTVD.div(100));
+    const mortgage = value.mul(LTVD.div(100)).toDecimalPlaces(0);
 
     console.log(syndicatorFee, transactionFee);
 
-    const feesAndCosts = value.mul(syndicatorFeeD.plus(transactionFeeD));
+    const feesAndCosts = value.mul(syndicatorFeeD.plus(transactionFeeD)).toDecimalPlaces(0);
     const balance = mortgage;
-    const capitalLift = value.minus(balance).minus(feesAndCosts);
+    const capitalLift = value.minus(balance).minus(feesAndCosts).toDecimalPlaces(0);
 
     const monthlyRateD = new Decimal(monthlyRate);
     const totalPaymentsD = new Decimal(totalPayments);
@@ -382,7 +382,7 @@ export function generateRefinanceCalculations(
       .mul(monthlyRateD.div(100))
       .mul(base.pow(totalPaymentsD.div(100)));
     const denominator = base.pow(totalPaymentsD.div(100)).minus(one);
-    const refinancePMT = numerator.div(denominator);
+    const refinancePMT = numerator.div(denominator).toDecimalPlaces(0);
 
     capRates.push({
       month,

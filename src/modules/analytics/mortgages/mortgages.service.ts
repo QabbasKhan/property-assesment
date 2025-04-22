@@ -140,7 +140,7 @@ export class MortgagesService {
     const calc_noiProjections = NoiProjectionCalculator.calculateProjections(
       dto.noi, // D9
       dto.annual_noi_increase, // D10
-      dto.occupancy,
+      [dto.occupancy1, dto.occupancy2, dto.occupancy3, dto.occupancy4, dto.occupancy4, dto.occupancy5, dto.occupancy6,dto.occupancy7, dto.occupancy8,dto.occupancy9, dto.occupancy10],
     );
 
     //---------------------------------Cap Rates-----------------------------------//
@@ -192,6 +192,7 @@ export class MortgagesService {
   }
 
   async test(dto: CreateMortgageDto) {
+    
     const calc_principal = mortgageLoanPrincipal(
       dto.asking_price, // D6
       dto.offer_perc, // D7
@@ -212,13 +213,6 @@ export class MortgagesService {
       dto.asking_price, // D6
       dto.offer_perc, // D7
       dto.loan_annual_intr, // D14
-    );
-
-    const mortgageBalance = calculateRemainingMortgageBalance(
-      calc_principal,
-      calc_monthlyRate,
-      calc_monthlyPmt,
-      20, //37, 49, 61
     );
 
     //----------------------------Payment And Refinance--------------------------------//
@@ -307,7 +301,7 @@ export class MortgagesService {
     const calc_noiProjections = NoiProjectionCalculator.calculateProjections(
       dto.noi, // D9
       dto.annual_noi_increase, // D10
-      dto.occupancy,
+      [dto.occupancy1, dto.occupancy2, dto.occupancy3, dto.occupancy4, dto.occupancy4, dto.occupancy5, dto.occupancy6,dto.occupancy7, dto.occupancy8,dto.occupancy9, dto.occupancy10],
     );
 
     //---------------------------------Cap Rates-----------------------------------//
@@ -339,7 +333,7 @@ export class MortgagesService {
       calc_totalPayments,
     );
 
-    return { calc_capRate2 };
+    // return { calc_capRate2 };
 
     return {
       loanAmount: calc_principal,

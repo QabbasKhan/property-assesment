@@ -131,35 +131,26 @@ export class CreateMortgageDto {
   @Max(100)
   realtor_fee: number;
 
-  @IsArray()
-  @ArrayMinSize(10)
-  @ArrayMaxSize(10)
-  @Type(() => Number)
-  @IsNumber({}, { each: true })
-  @Min(0, { each: true })
-  @Max(100, { each: true })
-  occupancy: number[];
-
-  // @IsNumber()
-  // occupancy_year1: number;
-  // @IsNumber()
-  // occupancy_year2: number;
-  // @IsNumber()
-  // occupancy_year3: number;
-  // @IsNumber()
-  // occupancy_year4: number;
-  // @IsNumber()
-  // occupancy_year5: number;
-  // @IsNumber()
-  // occupancy_year6: number;
-  // @IsNumber()
-  // occupancy_year7: number;
-  // @IsNumber()
-  // occupancy_year8: number;
-  // @IsNumber()
-  // occupancy_year9: number;
-  // @IsNumber()
-  // occupancy_year10: number;
+  @IsNumber()
+  occupancy1: number;
+  @IsNumber()
+  occupancy2: number;
+  @IsNumber()
+  occupancy3: number;
+  @IsNumber()
+  occupancy4: number;
+  @IsNumber()
+  occupancy5: number;
+  @IsNumber()
+  occupancy6: number;
+  @IsNumber()
+  occupancy7: number;
+  @IsNumber()
+  occupancy8: number;
+  @IsNumber()
+  occupancy9: number;
+  @IsNumber()
+  occupancy10: number;
 
   @Type(() => Number)
   @IsNumber()
