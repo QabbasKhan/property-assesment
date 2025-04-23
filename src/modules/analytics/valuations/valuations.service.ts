@@ -211,7 +211,7 @@ export class ValuationsService {
       dto.syndi_sale_price_fee,
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
-      60,
+      37,
       5,
     );
     if (year5) exitValuation.push(year5);
@@ -239,9 +239,11 @@ export class ValuationsService {
       dto.syndi_sale_price_fee,
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
-      180,
+      120,
       10,
     );
+    console.log('year10', year10);
+
     if (year10) exitValuation.push(year10);
 
     // console.log(exitValuation);
