@@ -44,6 +44,7 @@
     "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express-basic-auth": "^1.2.1",
+    "financial": "^0.2.4",
     "firebase-admin": "^12.6.0",
     "googleapis": "^144.0.0",
     "heic-convert": "^2.1.0",

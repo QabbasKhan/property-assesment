@@ -305,13 +305,6 @@ export class MortgagesService {
     );
 
     //---------------------------------Cap Rates-----------------------------------//
-    // const calc_capRate = CapRateCalculator.getMilestoneCapRates(
-    //   dto.purchase_cap_rate, // H18 (e.g., 5.5)
-    //   dto.year_5_cap_rate, // H19 (e.g., 6.0)
-    //   dto.year_7_cap_rate, // H20 (e.g., 6.25)
-    //   dto.year_10_cap_rate, // H21 (e.g., 6.5)
-    //   [37, 48, 60, 84, 120], // Exact months needed
-    // );
 
     const calc_capRates = generateMonthlyCapRates(
       dto.purchase_cap_rate, // H18 (e.g., 5.5)
@@ -345,9 +338,9 @@ export class MortgagesService {
       capRates: calc_capRates,
       primaryAndRefinanceData: {
         primary: calc_originalPayments || [],
-        refinanced: refinancedPayments || {},
+        refinanced: refinancedPayments || []
       },
-      data: calc_capRate2,
+      refinanceCalculation: calc_capRate2,
     };
   }
 
