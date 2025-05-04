@@ -11,10 +11,10 @@ export function calculatePurchasePrice(
 
 export function calculateDownPayment(
   calc_purchasePrice: Decimal,
-  financingLtvPercent: number,
+  calc_principal: number,
 ): Decimal {
 
-  return calc_purchasePrice.minus(new Decimal(financingLtvPercent).div(100));
+  return calc_purchasePrice.minus(new Decimal(calc_principal).div(100));
 }
 
 export function calculateInvestment(

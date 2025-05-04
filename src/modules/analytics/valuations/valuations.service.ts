@@ -1,19 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  calculateCompleteNoRefinance,
-  // calculateCompleteNoRefinance,
-  calculateDownPayment,
-  calculateExitValuations,
-  calculateInvestment,
-  calculateNoRefinance,
-  calculatePurchasePrice,
-  calculateSingleExitValuation,
-  calculateWithRefinance,
-  NoiProjectionCalculator,
-} from 'src/common/utils/fr-valuation-filter.util';
-import { CreateValuationDto } from './dto/create-valuation.dto';
-import { UpdateValuationDto } from './dto/update-valuation.dto';
-import {
   AnnualPaymentCalculator,
   calculateMonthlyInterestRate,
   calculateMonthlyPayment,
@@ -22,7 +8,19 @@ import {
   generateRefinanceCalculations,
   mortgageLoanPrincipal,
 } from 'src/common/utils/fr-mortgage-filter.util';
-import { PrimaryRefinanceData } from '../mortgages/entities/mortgage.entity';
+import {
+  calculateCompleteNoRefinance,
+  // calculateCompleteNoRefinance,
+  calculateDownPayment,
+  calculateInvestment,
+  calculateNoRefinance,
+  calculatePurchasePrice,
+  calculateSingleExitValuation,
+  calculateWithRefinance,
+  NoiProjectionCalculator
+} from 'src/common/utils/fr-valuation-filter.util';
+import { CreateValuationDto } from './dto/create-valuation.dto';
+import { UpdateValuationDto } from './dto/update-valuation.dto';
 
 @Injectable()
 export class ValuationsService {
@@ -40,6 +38,12 @@ export class ValuationsService {
     const calc_totalPayments = calculateTotalPayments(dto.loan_terms_inyear);
 
     const calc_purchasePrice = calculatePurchasePrice(asking_price, offer_perc);
+
+    const calc_principal = mortgageLoanPrincipal(
+      dto.asking_price, // D6
+      dto.offer_perc, // D7
+      dto.financing_ltv_perc,
+    );
 
     const calc_downPayment = calculateDownPayment(
       calc_purchasePrice,
@@ -84,11 +88,11 @@ export class ValuationsService {
     );
 
     //-----------------------helpers--------------------------//
-    const calc_principal = mortgageLoanPrincipal(
-      dto.asking_price, // D6
-      dto.offer_perc, // D7
-      dto.financing_ltv_perc,
-    );
+    // const calc_principal = mortgageLoanPrincipal(
+    //   dto.asking_price, // D6
+    //   dto.offer_perc, // D7
+    //   dto.financing_ltv_perc,
+    // );
     const calc_monthlyPmt = calculateMonthlyPayment(
       calc_principal,
       dto.loan_annual_intr,
