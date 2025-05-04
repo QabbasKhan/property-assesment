@@ -13,9 +13,8 @@ export function calculateDownPayment(
   calc_purchasePrice: Decimal,
   financingLtvPercent: number,
 ): Decimal {
-  console.log(calc_purchasePrice, financingLtvPercent);
 
-  return calc_purchasePrice.mul(new Decimal(financingLtvPercent).div(100));
+  return calc_purchasePrice.minus(new Decimal(financingLtvPercent).div(100));
 }
 
 export function calculateInvestment(
@@ -23,7 +22,6 @@ export function calculateInvestment(
   closingCosts: number,
   reserve: number,
 ): Decimal {
-  console.log('--', typeof downPayment);
 
   return downPayment.plus(new Decimal(closingCosts)).plus(new Decimal(reserve));
 }

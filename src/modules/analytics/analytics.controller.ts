@@ -6,12 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Search,
+  Query,
 } from '@nestjs/common';
 import { AnalyticsService } from './analytics.service';
 import { CreateAnalyticsDto } from './dto/create-analytics.dto';
 import { UpdateAnalyticsDto } from './dto/update-analytics.dto';
 import { ApiTags } from '@nestjs/swagger';
 import path from 'path';
+import { Paginate } from 'src/common/decorators/pagination.decorator';
+import { Pagination } from 'src/common/utils/types.util';
 
 @ApiTags('ANALYTICS')
 @Controller({ path: 'analytics', version: '1' })
@@ -25,8 +29,8 @@ export class AnalyticsController {
   }
 
   @Post('/all')
-  async getAll(@Body() createAnalyticsDto: CreateAnalyticsDto) {
-    const data = await this.analyticsService.getAll(createAnalyticsDto);
+  async getAll(@Paginate() pagination: Pagination, @Query() query: {search : string, status: string }) {
+    const data = await this.analyticsService.getAll(pagination, query);
     return { data };
   }
 

@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Analytics } from './entities/analytics.entity';
 import { Model } from 'mongoose';
 import { MortgagesService } from './mortgages/mortgages.service';
+import { Pagination } from 'src/common/utils/types.util';
 
 @Injectable()
 export class AnalyticsService {
@@ -19,8 +20,16 @@ export class AnalyticsService {
     return await this.Analytic.create(createAnalyticsDto);
   }
 
-  async getAll(dto: CreateAnalyticsDto) {
-    // await this.mortgageService.test(dto.)
+  async getAll(pagination: Pagination, query: { search: string, status: string}) {
+    const dbQuery = {
+          ...(!!query.search && { saveAs: { $regex: query.search, $options: 'i' } }),
+          ...(!!query.status && query.status !== 'all' && {status: query.status})
+        };
+
+        const data = await this.Analytic.find(dbQuery).skip(pagination.skip).limit(pagination.limit)
+        const totalAmount = await this.Analytic.countDocuments(dbQuery)
+
+        return {data, totalAmount}
   }
 
   async findOne(id: string) {
