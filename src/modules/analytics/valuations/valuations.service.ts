@@ -47,7 +47,7 @@ export class ValuationsService {
 
     const calc_downPayment = calculateDownPayment(
       calc_purchasePrice,
-      financing_ltv_perc,
+      calc_principal,
     );
 
     const calc_investment = calculateInvestment(

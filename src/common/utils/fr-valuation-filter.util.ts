@@ -14,7 +14,7 @@ export function calculateDownPayment(
   calc_principal: number,
 ): Decimal {
 
-  return calc_purchasePrice.minus(new Decimal(calc_principal).div(100));
+  return calc_purchasePrice.minus(new Decimal(calc_principal));
 }
 
 export function calculateInvestment(
