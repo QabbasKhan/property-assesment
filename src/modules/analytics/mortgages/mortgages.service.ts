@@ -35,10 +35,15 @@ export class MortgagesService {
 
     const calc_totalPayments = calculateTotalPayments(dto.loan_terms_inyear);
 
+    // const calc_monthlyPmt = calculateMonthlyPayment(
+    //   calc_principal,
+    //   dto.loan_annual_intr,
+    //   dto.loan_terms_inyear,
+    // );    //change 4 May, ref: stepwise mortgage doc
     const calc_monthlyPmt = calculateMonthlyPayment(
       calc_principal,
-      dto.loan_annual_intr,
-      dto.loan_terms_inyear,
+      calc_monthlyRate,
+      calc_totalPayments,
     );
 
     const calc_interestOnlyPayment = calculateInterestOnlyPayment(
@@ -140,7 +145,19 @@ export class MortgagesService {
     const calc_noiProjections = NoiProjectionCalculator.calculateProjections(
       dto.noi, // D9
       dto.annual_noi_increase, // D10
-      [dto.occupancy1, dto.occupancy2, dto.occupancy3, dto.occupancy4, dto.occupancy4, dto.occupancy5, dto.occupancy6,dto.occupancy7, dto.occupancy8,dto.occupancy9, dto.occupancy10],
+      [
+        dto.occupancy1,
+        dto.occupancy2,
+        dto.occupancy3,
+        dto.occupancy4,
+        dto.occupancy4,
+        dto.occupancy5,
+        dto.occupancy6,
+        dto.occupancy7,
+        dto.occupancy8,
+        dto.occupancy9,
+        dto.occupancy10,
+      ],
     );
 
     //---------------------------------Cap Rates-----------------------------------//
@@ -192,7 +209,6 @@ export class MortgagesService {
   }
 
   async test(dto: CreateMortgageDto) {
-    
     const calc_principal = mortgageLoanPrincipal(
       dto.asking_price, // D6
       dto.offer_perc, // D7
@@ -203,10 +219,17 @@ export class MortgagesService {
 
     const calc_totalPayments = calculateTotalPayments(dto.loan_terms_inyear);
 
+    // const calc_monthlyPmt = calculateMonthlyPayment(
+    //   calc_principal,
+    //   dto.loan_annual_intr,
+    //   dto.loan_terms_inyear,
+    // );
+
+    //change 4 May, ref: stepwise mortgage doc
     const calc_monthlyPmt = calculateMonthlyPayment(
       calc_principal,
-      dto.loan_annual_intr,
-      dto.loan_terms_inyear,
+      calc_monthlyRate,
+      calc_totalPayments,
     );
 
     const calc_interestOnlyPayment = calculateInterestOnlyPayment(
@@ -301,17 +324,29 @@ export class MortgagesService {
     const calc_noiProjections = NoiProjectionCalculator.calculateProjections(
       dto.noi, // D9
       dto.annual_noi_increase, // D10
-      [dto.occupancy1, dto.occupancy2, dto.occupancy3, dto.occupancy4, dto.occupancy4, dto.occupancy5, dto.occupancy6,dto.occupancy7, dto.occupancy8,dto.occupancy9, dto.occupancy10],
+      [
+        dto.occupancy1,
+        dto.occupancy2,
+        dto.occupancy3,
+        dto.occupancy4,
+        dto.occupancy4,
+        dto.occupancy5,
+        dto.occupancy6,
+        dto.occupancy7,
+        dto.occupancy8,
+        dto.occupancy9,
+        dto.occupancy10,
+      ],
     );
 
     //---------------------------------Cap Rates-----------------------------------//
 
-    const calc_capRates = generateMonthlyCapRates(
-      dto.purchase_cap_rate, // H18 (e.g., 5.5)
-      dto.year_5_cap_rate, // H19 (e.g., 6.0)
-      dto.year_7_cap_rate, // H20 (e.g., 6.25)
-      dto.year_10_cap_rate,
-    );
+    // const calc_capRates = generateMonthlyCapRates(
+    //   dto.purchase_cap_rate, // H18 (e.g., 5.5)
+    //   dto.year_5_cap_rate, // H19 (e.g., 6.0)
+    //   dto.year_7_cap_rate, // H20 (e.g., 6.25)
+    //   dto.year_10_cap_rate,
+    // );
 
     const calc_capRate2 = generateRefinanceCalculations(
       dto.purchase_cap_rate, // H18 (e.g., 5.5)
@@ -335,10 +370,10 @@ export class MortgagesService {
       monthlyPayment: calc_monthlyPmt,
       interestOnlyPayment: calc_interestOnlyPayment,
       noiProjection: calc_noiProjections,
-      capRates: calc_capRates,
+      // capRates: calc_capRates,
       primaryAndRefinanceData: {
         primary: calc_originalPayments || [],
-        refinanced: refinancedPayments || []
+        refinanced: refinancedPayments || [],
       },
       refinanceCalculation: calc_capRate2,
     };

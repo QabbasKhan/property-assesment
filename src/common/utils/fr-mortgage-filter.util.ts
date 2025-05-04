@@ -1,4 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
 import Decimal from 'decimal.js';
 
 /**
@@ -53,11 +52,13 @@ export function calculateMonthlyPayment(
   // Validate inputs
   //   if (principal <= 0) throw new Error('Principal must be greater than 0');
   //   if (annualRate <= 0) throw new Error('Annual rate must be greater than 0');
-  //   if (years <= 0) throw new Error('Loan term must be greater than 0');
+  //   if (years <= 0) throw new Error('Loan term must be greater t
 
   const P = new Decimal(principal);
-  const r = new Decimal(annualRate).div(100).div(12).toDecimalPlaces(6); // Monthly rate with 6 intermediate precision
-  const n = new Decimal(years).mul(12); // Total months
+  const r = new Decimal(annualRate); // Monthly rate with 6 intermediate precision
+  const n = new Decimal(years); // Total months
+  // const r = new Decimal(annualRate).div(100).div(12).toDecimalPlaces(6); // Monthly rate with 6 intermediate precision
+  // const n = new Decimal(years).mul(12); // Total months
 
   // Calculate (1+r)^n
   const onePlusR = new Decimal(1).plus(r);
@@ -338,28 +339,28 @@ export function generateRefinanceCalculations(
     let value: Decimal;
     let capRatePercent;
     let NOI;
-    if (month <= 37) {
+    if (month == 37) {
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[2].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
-    } else if (month <= 60) {
+    } else if (month == 60) {
       capRatePercent = capRate.div(100); // convert to decimal
-      NOI = new Decimal(NOIs[3].realizedNoi);
-      console.log(month, NOI);
-      value = NOI.div(capRatePercent).toDecimalPlaces(0);
-    } else if (month <= 84) {
-      capRatePercent = capRate.div(100) // convert to decimal
       NOI = new Decimal(NOIs[5].realizedNoi);
+      console.log(month, NOI);
+      value = NOI.div(capRatePercent).toDecimalPlaces(0);
+    } else if (month == 84) {
+      capRatePercent = capRate.div(100); // convert to decimal
+      NOI = new Decimal(NOIs[7].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
-    } else if (month <= 120) {
-      capRatePercent = capRate.div(100) // convert to decimal
-      NOI = new Decimal(NOIs[8].realizedNoi);
+    } else if (month == 120) {
+      capRatePercent = capRate.div(100); // convert to decimal
+      NOI = new Decimal(NOIs[9].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
     } else {
-      capRatePercent = capRate.div(100) // convert to decimal
+      capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[9].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       console.log(month, NOI);
@@ -367,11 +368,16 @@ export function generateRefinanceCalculations(
 
     const mortgage = value.mul(LTVD.div(100)).toDecimalPlaces(0);
 
-    console.log(syndicatorFee, transactionFee);
+    // console.log(syndicatorFee, transactionFee);
 
-    const feesAndCosts = value.mul(syndicatorFeeD.plus(transactionFeeD)).toDecimalPlaces(0);
+    const feesAndCosts = value
+      .mul(syndicatorFeeD.plus(transactionFeeD))
+      .toDecimalPlaces(0);
     const balance = mortgage;
-    const capitalLift = value.minus(balance).minus(feesAndCosts).toDecimalPlaces(0);
+    const capitalLift = value
+      .minus(balance)
+      .minus(feesAndCosts)
+      .toDecimalPlaces(0);
 
     const monthlyRateD = new Decimal(monthlyRate);
     const totalPaymentsD = new Decimal(totalPayments);
