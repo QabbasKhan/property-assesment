@@ -24,7 +24,7 @@ export function mortgageLoanPrincipal(
 export function calculateMonthlyInterestRate(annualRate: number): number {
   const rate = new Decimal(annualRate);
   //   if (rate.lte(0)) throw new BadRequestException('Annual rate must be > 0');
-  return rate.div(100).div(12).toDecimalPlaces(4).toNumber();
+  return rate.div(100).div(12).toDecimalPlaces(6).toNumber();
 }
 
 /**
@@ -201,6 +201,8 @@ export class AnnualPaymentCalculator {
     const payments: number[] = [];
     const monthlyPmt = new Decimal(monthlyPayment).abs();
 
+    console.log(interestOnlyMonths, firstPaymentMonth);
+
     // Year 1 Calculation
     if (interestOnlyMonths > 0) {
       const effectiveMonths = new Decimal(12).minus(interestOnlyMonths);
@@ -311,6 +313,8 @@ export function generateRefinanceCalculations(
   transactionFee: number, // e.g. 0.005
   monthlyRate: number, // e.g. 0.06 (6%)
   totalPayments: number, // e.g. 30
+  principal: number,
+  monthlyPayment: number,
 ) {
   const syndicatorFeeD = new Decimal(syndicatorFee).div(100);
   const transactionFeeD = new Decimal(transactionFee).div(100);
@@ -375,22 +379,34 @@ export function generateRefinanceCalculations(
     const feesAndCosts = value
       .mul(syndicatorFeeD.plus(transactionFeeD))
       .toDecimalPlaces(0);
-    const balance = mortgage;
-    const capitalLift = value
-      .minus(balance)
-      .minus(feesAndCosts)
-      .toDecimalPlaces(0);
 
     const monthlyRateD = new Decimal(monthlyRate);
     const totalPaymentsD = new Decimal(totalPayments);
 
+    //For Refinance PMT
     const one = new Decimal(1);
-    const base = one.plus(monthlyRateD.div(100)); // (1 + monthlyRate)
-    const numerator = mortgage
-      .mul(monthlyRateD.div(100))
-      .mul(base.pow(totalPaymentsD.div(100)));
-    const denominator = base.pow(totalPaymentsD.div(100)).minus(one);
+    const base = one.plus(monthlyRateD); // (1 + monthlyRate)
+    const numerator = mortgage.mul(monthlyRateD).mul(base.pow(totalPaymentsD));
+    const denominator = base.pow(totalPaymentsD).minus(one);
     const refinancePMT = numerator.div(denominator).toDecimalPlaces(0);
+
+    const onePlusR = monthlyRateD.plus(1);
+    const onePlusRPowerT = onePlusR.pow(month);
+    const firstTerm = new Decimal(principal).mul(onePlusRPowerT);
+    const secondTerm = new Decimal(monthlyPayment)
+      .mul(onePlusRPowerT.minus(1))
+      .div(monthlyRateD);
+
+    const balanceAtRefinance = firstTerm.minus(secondTerm).toDecimalPlaces(0);
+
+    const balance = mortgage;
+
+    const capitalLift = balance
+      .minus(balanceAtRefinance)
+      .minus(feesAndCosts)
+      .toDecimalPlaces(0);
+
+    console.log(monthlyRateD, totalPaymentsD, mortgage, balanceAtRefinance);
 
     capRates.push({
       month,
@@ -400,6 +416,7 @@ export function generateRefinanceCalculations(
       feesAndCosts: Number(feesAndCosts),
       capitalLift: Number(capitalLift),
       refinancePMT: Number(refinancePMT),
+      balanceAtRefinance: Number(balanceAtRefinance),
     });
   }
 

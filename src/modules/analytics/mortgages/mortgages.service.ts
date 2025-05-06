@@ -357,15 +357,17 @@ export class MortgagesService {
       dto.transaction_and_bank_fee,
       calc_monthlyRate,
       calc_totalPayments,
+      calc_principal,
+      calc_monthlyPmt,
     );
 
     // return { calc_capRate2 };
-    const result =
-      (dto.number_months_intr_only > 0
-        ? Math.min(dto.number_months_intr_only, 12)
-        : 0) -
-      dto.first_month_principal_and_intr_payment +
-      1;
+    // const result =
+    //   (dto.number_months_intr_only > 0
+    //     ? Math.min(dto.number_months_intr_only, 12)
+    //     : 0) -
+    //   dto.first_month_principal_and_intr_payment +
+    //   1;
 
     return {
       loanAmount: calc_principal,

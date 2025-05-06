@@ -17,7 +17,7 @@ import {
   calculatePurchasePrice,
   calculateSingleExitValuation,
   calculateWithRefinance,
-  NoiProjectionCalculator
+  NoiProjectionCalculator,
 } from 'src/common/utils/fr-valuation-filter.util';
 import { CreateValuationDto } from './dto/create-valuation.dto';
 import { UpdateValuationDto } from './dto/update-valuation.dto';
@@ -74,19 +74,6 @@ export class ValuationsService {
       ],
     );
 
-    const mortgageData = generateRefinanceCalculations(
-      dto.purchase_cap_rate, // H18 (e.g., 5.5)
-      dto.year_5_cap_rate, // H19 (e.g., 6.0)
-      dto.year_7_cap_rate, // H20 (e.g., 6.25)
-      dto.year_10_cap_rate,
-      calc_noiProjections,
-      dto.financing_ltv_perc,
-      dto.syndi_sale_price_fee,
-      dto.transaction_and_bank_fee,
-      calc_monthlyRate,
-      calc_totalPayments,
-    );
-
     //-----------------------helpers--------------------------//
     // const calc_principal = mortgageLoanPrincipal(
     //   dto.asking_price, // D6
@@ -105,6 +92,22 @@ export class ValuationsService {
         dto.first_month_principal_and_intr_payment,
       );
     //---------------------------------------------------------//
+
+    const mortgageData = generateRefinanceCalculations(
+      dto.purchase_cap_rate, // H18 (e.g., 5.5)
+      dto.year_5_cap_rate, // H19 (e.g., 6.0)
+      dto.year_7_cap_rate, // H20 (e.g., 6.25)
+      dto.year_10_cap_rate,
+      calc_noiProjections,
+      dto.financing_ltv_perc,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      calc_monthlyRate,
+      calc_totalPayments,
+      calc_principal,
+      calc_monthlyPmt,
+    );
+
     const primaryRefinanceData = this.getPrimaryAndRefinanceData(dto);
     const noRefinanceYear5 = calculateNoRefinance(
       calc_noiProjections,
