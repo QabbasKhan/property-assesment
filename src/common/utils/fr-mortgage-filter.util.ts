@@ -80,18 +80,19 @@ export function calculateMonthlyPayment(
  * @returns Monthly interest-only payment rounded to 2 decimal places (currency)
  */
 export function calculateInterestOnlyPayment(
-  askingPrice: number,
-  offerPerc: number,
+  principal: number,
+  // offerPerc: number,
   annualInterestRate: number,
 ): number {
   // Convert all inputs to Decimal for precise calculations
-  const principal = new Decimal(askingPrice).mul(
-    new Decimal(offerPerc).div(100),
-  );
+  // const principal = new Decimal(askingPrice).mul(
+  //   new Decimal(offerPerc).div(100),
+  // );
 
+  const dec_principal = new Decimal(principal);
   const monthlyRate = new Decimal(annualInterestRate).div(100).div(12);
 
-  return principal
+  return dec_principal
     .mul(monthlyRate)
     .toDecimalPlaces(2) // Round to cents
     .toNumber();
@@ -202,8 +203,9 @@ export class AnnualPaymentCalculator {
 
     // Year 1 Calculation
     if (interestOnlyMonths > 0) {
-      const effectiveMonths = new Decimal(12).minus(firstPaymentMonth - 1);
+      const effectiveMonths = new Decimal(12).minus(interestOnlyMonths);
       payments.push(monthlyPmt.mul(effectiveMonths).toNumber());
+      // console.log(effectiveMonths, interestOnlyMonths, monthlyPayment);
     } else {
       payments.push(monthlyPmt.mul(12).toNumber());
     }
@@ -343,27 +345,27 @@ export function generateRefinanceCalculations(
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[2].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
-      console.log(month, NOI);
+      // console.log(month, NOI);
     } else if (month == 60) {
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[5].realizedNoi);
-      console.log(month, NOI);
+      // console.log(month, NOI);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
     } else if (month == 84) {
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[7].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
-      console.log(month, NOI);
+      // console.log(month, NOI);
     } else if (month == 120) {
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[9].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
-      console.log(month, NOI);
+      // console.log(month, NOI);
     } else {
       capRatePercent = capRate.div(100); // convert to decimal
       NOI = new Decimal(NOIs[9].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
-      console.log(month, NOI);
+      // console.log(month, NOI);
     }
 
     const mortgage = value.mul(LTVD.div(100)).toDecimalPlaces(0);
