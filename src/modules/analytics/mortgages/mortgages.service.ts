@@ -295,7 +295,7 @@ export class MortgagesService {
     }
 
     if (dto.refinance_61_rate) {
-      const balanceAt37 = calculateRemainingMortgageBalance(
+      const balanceAt61 = calculateRemainingMortgageBalance(
         calc_principal,
         dto.loan_annual_intr,
         calc_monthlyPmt,
@@ -303,7 +303,7 @@ export class MortgagesService {
       );
 
       const refinancedMonthlyPmt = calculateMonthlyPayment(
-        balanceAt37,
+        balanceAt61,
         dto.refinance_61_rate,
         dto.refinance_61_term_years,
       );

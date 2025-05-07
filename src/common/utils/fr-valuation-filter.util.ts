@@ -1,6 +1,7 @@
 import Decimal from 'decimal.js';
-import { DROP_DOWN } from 'src/modules/analytics/enums/input-fields.enum';
 import { irr } from 'financial'; // Using financial library for IRR calculation
+import { DROP_DOWN } from 'src/modules/analytics/enums/input-fields.enum';
+import { calculateRemainingMortgageBalance } from './fr-mortgage-filter.util';
 
 export function calculatePurchasePrice(
   asking_price: number,
@@ -13,7 +14,6 @@ export function calculateDownPayment(
   calc_purchasePrice: Decimal,
   calc_principal: number,
 ): Decimal {
-
   return calc_purchasePrice.minus(new Decimal(calc_principal));
 }
 
@@ -22,7 +22,6 @@ export function calculateInvestment(
   closingCosts: number,
   reserve: number,
 ): Decimal {
-
   return downPayment.plus(new Decimal(closingCosts)).plus(new Decimal(reserve));
 }
 
@@ -118,10 +117,11 @@ export function calculateExitValuations(
   syndiFeePercent: number, // D34
   transactionFeePercent: number, // D35
   realtorFeePercent: number, // D36
+  principal: number,
+  annualInterest: number,
+  monthlyPayment: number,
 ): [] {
   const results = [];
-
-  console.log(noiResults10yr, noiResults5yr);
 
   // Calculate for 5th year (month 60)
   const year5 = calculateSingleExitValuation(
@@ -135,6 +135,9 @@ export function calculateExitValuations(
     realtorFeePercent,
     60,
     5,
+    principal,
+    annualInterest,
+    monthlyPayment,
   );
   if (year5) results.push(year5);
 
@@ -150,6 +153,9 @@ export function calculateExitValuations(
     realtorFeePercent,
     84,
     7,
+    principal,
+    annualInterest,
+    monthlyPayment,
   );
   if (year7) results.push(year7);
 
@@ -165,6 +171,9 @@ export function calculateExitValuations(
     realtorFeePercent,
     120,
     10,
+    principal,
+    annualInterest,
+    monthlyPayment,
   );
   if (year10) results.push(year10);
 
@@ -173,7 +182,7 @@ export function calculateExitValuations(
 
 export function calculateSingleExitValuation(
   mortgageData: any[],
-  noiResults: any[],
+  noRefinanceResults: any[],
   investmentAmount: number,
   preferredReturnPerc: number,
   waterfallSharePerc: number,
@@ -182,6 +191,9 @@ export function calculateSingleExitValuation(
   realtorFeePercent: number,
   targetMonth: number,
   targetYear: number,
+  principal: number,
+  annualInterest: number,
+  monthlyPayment: number,
 ) {
   // 1. Get sale price from mortgage data
   const mortgageEntry = mortgageData.find((d) => d.month === targetMonth);
@@ -194,11 +206,21 @@ export function calculateSingleExitValuation(
     .plus(transactionFeePercent)
     .plus(realtorFeePercent)
     .div(100);
+
   const sellingCosts = salePrice.mul(totalFeePercent);
-  const netProceeds = salePrice.minus(sellingCosts);
+
+  const mortgage = calculateRemainingMortgageBalance(
+    principal,
+    annualInterest,
+    monthlyPayment,
+    targetMonth,
+  );
+
+  const netProceeds = salePrice.minus(sellingCosts).minus(mortgage);
 
   // 3. Calculate total due investor
-  const totalDividendsPaid = calculateTotalDividendsPaid(noiResults);
+
+  const totalDividendsPaid = calculateTotalDividendsPaid(noRefinanceResults);
   const preferredDividend = new Decimal(investmentAmount)
     .mul(preferredReturnPerc)
     .div(100)
@@ -209,7 +231,8 @@ export function calculateSingleExitValuation(
     .minus(totalDividendsPaid); // Subtract dividends already paid
 
   // 4. Calculate excess capital gains
-  const excessCapitalGains = netProceeds.plus(totalDueInvestor);
+  // const excessCapitalGains = netProceeds.plus(totalDueInvestor);
+  const excessCapitalGains = netProceeds.minus(totalDueInvestor);
 
   // 5. Calculate LP payment (waterfall)
   const lpPayment = excessCapitalGains.mul(waterfallSharePerc).div(100);
@@ -219,17 +242,19 @@ export function calculateSingleExitValuation(
 
   return {
     year: targetYear,
-    salePrice: salePrice.toDecimalPlaces(2).toNumber(),
-    sellingCosts: sellingCosts.toDecimalPlaces(2).toNumber(),
-    netProceeds: netProceeds.toDecimalPlaces(2).toNumber(),
-    totalDueInvestor: totalDueInvestor.toDecimalPlaces(2).toNumber(),
-    excessCapitalGains: excessCapitalGains.toDecimalPlaces(2).toNumber(),
-    lpPayment: lpPayment.toDecimalPlaces(2).toNumber(),
-    gpShare: gpShare.toDecimalPlaces(2).toNumber(),
+    salePrice: salePrice.toDecimalPlaces(0).toNumber(),
+    sellingCosts: sellingCosts.toDecimalPlaces(0).toNumber(),
+    netProceeds: netProceeds.toDecimalPlaces(0).toNumber(),
+    totalDueInvestor: totalDueInvestor.toDecimalPlaces(0).toNumber(),
+    excessCapitalGains: excessCapitalGains.toDecimalPlaces(0).toNumber(),
+    lpPayment: lpPayment.toDecimalPlaces(0).toNumber(),
+    gpShare: gpShare.toDecimalPlaces(0).toNumber(),
   };
 }
 
 function calculateTotalDividendsPaid(noiResults: any[]): Decimal {
+  // console.log('NR:', noiResults);
+
   return noiResults.reduce(
     (sum, result) => sum.plus(result.cashFlow > 0 ? result.cashFlow : 0),
     new Decimal(0),
@@ -260,18 +285,19 @@ export function calculateNoRefinance(
     const aumFee = new Decimal(investment).mul(syndiAumFee).div(100);
 
     // 4. Get Debt Service (from refinanceData)
+
     const debtService = new Decimal(primaryData[year] || 0).toDecimalPlaces(0);
 
     // 5. Calculate Cash Flow with conditional fee application
     let cashFlow = noiValue;
 
-    if (dynamicOne === DROP_DOWN.YES) {
+    if (dynamicTwo === DROP_DOWN.YES) {
       cashFlow = cashFlow.minus(propertyManagementFee);
     }
-    if (dynamicTwo === DROP_DOWN.YES) {
+    if (dynamicOne === DROP_DOWN.YES) {
       cashFlow = cashFlow.minus(aumFee);
     }
-    cashFlow = cashFlow.plus(debtService).toDecimalPlaces(0);
+    cashFlow = cashFlow.minus(debtService).toDecimalPlaces(0);
 
     annualCashFlows.push({
       year: year + 1,
@@ -374,6 +400,9 @@ export function calculateCompleteNoRefinance(
   transactionFeePercent: number,
   realtorFeePercent: number,
   years: number,
+  principal: number,
+  annualInterest: number,
+  monthlyPayment: number,
 ) {
   // 1. Calculate annual cash flows
   const annualCashFlows = calculateNoRefinance(
@@ -400,6 +429,9 @@ export function calculateCompleteNoRefinance(
     realtorFeePercent,
     targetMonth,
     years,
+    principal,
+    annualInterest,
+    monthlyPayment,
   );
 
   if (!exitValuation) {
@@ -407,8 +439,8 @@ export function calculateCompleteNoRefinance(
   }
 
   // 3. Calculate cash flow from closing (Total Due Investor)
-  const cashFlowFromClosing = new Decimal(exitValuation.totalDueInvestor)
-    .toDecimalPlaces(2)
+  const cashFlowFromClosing = new Decimal(exitValuation.lpPayment)
+    .toDecimalPlaces(0)
     .toNumber();
 
   // 4. Calculate cash flow total (sum of annual + closing + investment)
@@ -419,19 +451,19 @@ export function calculateCompleteNoRefinance(
   const cashFlowTotal = totalAnnualCashFlow
     .plus(cashFlowFromClosing)
     .plus(investment)
-    .toDecimalPlaces(2)
+    .toDecimalPlaces(0)
     .toNumber();
 
   // 5. Calculate cash-on-cash returns
   const investmentDec = new Decimal(investment);
   const cashFlowsWithCoc = annualCashFlows.map((flow) => ({
     ...flow,
-    noi: new Decimal(flow.noi).toDecimalPlaces(2).toNumber(),
+    noi: new Decimal(flow.noi).toDecimalPlaces(0).toNumber(),
     propertyManagementFee: new Decimal(flow.propertyManagementFee)
-      .toDecimalPlaces(2)
+      .toDecimalPlaces(0)
       .toNumber(),
     aumFee: new Decimal(flow.aumFee).toDecimalPlaces(2).toNumber(),
-    cashFlow: new Decimal(flow.cashFlow).toDecimalPlaces(2).toNumber(),
+    cashFlow: new Decimal(flow.cashFlow).toDecimalPlaces(0).toNumber(),
     cashOnCashReturn:
       investment > 0
         ? new Decimal(flow.cashFlow)
@@ -447,26 +479,27 @@ export function calculateCompleteNoRefinance(
     cashFlowsWithCoc.reduce((sum, flow) => sum + flow.cashOnCashReturn, 0) /
       years,
   )
-    .toDecimalPlaces(2)
+    .toDecimalPlaces(0)
     .toNumber();
 
   // 7. Calculate total and annualized return
   const totalReturn = new Decimal(cashFlowTotal)
     .div(investment)
     .mul(100)
-    .toDecimalPlaces(2)
+    .toDecimalPlaces(0)
     .toNumber();
   const annualizedReturn = new Decimal(totalReturn)
     .div(years)
-    .toDecimalPlaces(2)
+    .toDecimalPlaces(0)
     .toNumber();
 
   // 8. Calculate IRR
   const irrCashFlows = [
     -investment, // Initial investment (negative)
     ...annualCashFlows.map((flow) => flow.cashFlow),
-    cashFlowFromClosing,
+    cashFlowFromClosing + investment,
   ];
+
   const irrValue = new Decimal(irr(irrCashFlows) * 100)
     .toDecimalPlaces(2)
     .toNumber();

@@ -82,9 +82,10 @@ export class ValuationsService {
     // );
     const calc_monthlyPmt = calculateMonthlyPayment(
       calc_principal,
-      dto.loan_annual_intr,
-      dto.loan_terms_inyear,
+      calc_monthlyRate,
+      calc_totalPayments,
     );
+
     const calc_originalPayments =
       AnnualPaymentCalculator.calculateOriginalPayments(
         calc_monthlyPmt,
@@ -109,6 +110,7 @@ export class ValuationsService {
     );
 
     const primaryRefinanceData = this.getPrimaryAndRefinanceData(dto);
+
     const noRefinanceYear5 = calculateNoRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -139,6 +141,7 @@ export class ValuationsService {
       dto.dynamic_drop_down_two,
       10,
     );
+
     const refinanceYear5m37 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -218,8 +221,11 @@ export class ValuationsService {
       dto.syndi_sale_price_fee,
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
-      37,
+      60,
       5,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
     );
     if (year5) exitValuation.push(year5);
 
@@ -234,6 +240,9 @@ export class ValuationsService {
       dto.realtor_fee,
       84,
       7,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
     );
     if (year7) exitValuation.push(year7);
 
@@ -248,8 +257,10 @@ export class ValuationsService {
       dto.realtor_fee,
       120,
       10,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
     );
-    console.log('year10', year10);
 
     if (year10) exitValuation.push(year10);
 
@@ -270,6 +281,9 @@ export class ValuationsService {
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
       5,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
     );
     const result7yr = calculateCompleteNoRefinance(
       calc_noiProjections,
@@ -286,6 +300,9 @@ export class ValuationsService {
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
       7,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
     );
     const result10yr = calculateCompleteNoRefinance(
       calc_noiProjections,
@@ -302,6 +319,9 @@ export class ValuationsService {
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
       5,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
     );
 
     // return {data, calc_investment}

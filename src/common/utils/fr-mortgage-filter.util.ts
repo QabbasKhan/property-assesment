@@ -108,6 +108,7 @@ export function calculateInterestOnlyPayment(
  * @param monthsElapsed - Months since loan start
  * @returns Remaining balance
  */
+// here
 export function calculateRemainingMortgageBalance(
   principal: number,
   annualRate: number,
@@ -406,7 +407,7 @@ export function generateRefinanceCalculations(
       .minus(feesAndCosts)
       .toDecimalPlaces(0);
 
-    console.log(monthlyRateD, totalPaymentsD, mortgage, balanceAtRefinance);
+    // console.log(monthlyRateD, totalPaymentsD, mortgage, balanceAtRefinance);
 
     capRates.push({
       month,
