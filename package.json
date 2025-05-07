@@ -2,7 +2,7 @@
   "name": "property-assesment",
   "version": "0.0.1",
   "engines": {
-    "node": ">=22",
+    "node": "20.x",
     "npm": ">=10"
   },
   "scripts": {
