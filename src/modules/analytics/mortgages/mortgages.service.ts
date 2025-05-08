@@ -6,10 +6,11 @@ import {
   calculateInterestOnlyPayment,
   calculateMonthlyInterestRate,
   calculateMonthlyPayment,
+  calculateRefinancedPaymentsNew,
   calculateRemainingMortgageBalance,
   calculateTotalPayments,
   CapRateCalculator,
-  generateMonthlyCapRates,
+  // generateMonthlyCapRates,
   generateRefinanceCalculations,
   mortgageLoanPrincipal,
 } from 'src/common/utils/fr-mortgage-filter.util';
@@ -214,15 +215,11 @@ export class MortgagesService {
       dto.financing_ltv_perc,
     );
 
+    //------------------------------Solo Values---------------------------------//
+
     const calc_monthlyRate = calculateMonthlyInterestRate(dto.loan_annual_intr); // D14
 
     const calc_totalPayments = calculateTotalPayments(dto.loan_terms_inyear);
-
-    // const calc_monthlyPmt = calculateMonthlyPayment(
-    //   calc_principal,
-    //   dto.loan_annual_intr,
-    //   dto.loan_terms_inyear,
-    // );
 
     //change 4 May, ref: stepwise mortgage doc
     const calc_monthlyPmt = calculateMonthlyPayment(
@@ -235,87 +232,6 @@ export class MortgagesService {
       calc_principal,
       dto.loan_annual_intr, // D14
     );
-
-    //----------------------------Payment And Refinance--------------------------------//
-
-    const calc_originalPayments =
-      AnnualPaymentCalculator.calculateOriginalPayments(
-        calc_monthlyPmt,
-        dto.number_months_intr_only,
-        dto.first_month_principal_and_intr_payment,
-      );
-
-    //Refinance Calculations (if applicable)
-    let refinancedPayments = [];
-
-    if (dto.refinance_37_rate) {
-      const balanceAt37 = calculateRemainingMortgageBalance(
-        calc_principal,
-        dto.loan_annual_intr,
-        calc_monthlyPmt,
-        37,
-      );
-
-      const refinancedMonthlyPmt = calculateMonthlyPayment(
-        balanceAt37,
-        dto.refinance_37_rate,
-        dto.refinance_37_term_years,
-      );
-
-      const refinancedPaymentsData =
-        AnnualPaymentCalculator.calculateRefinancedPayments(
-          refinancedMonthlyPmt,
-          37,
-        );
-
-      refinancedPayments.push(refinancedPaymentsData);
-    }
-
-    if (dto.refinance_49_rate) {
-      const balanceAt49 = calculateRemainingMortgageBalance(
-        calc_principal,
-        dto.loan_annual_intr,
-        calc_monthlyPmt,
-        49,
-      );
-
-      const refinancedMonthlyPmt = calculateMonthlyPayment(
-        balanceAt49,
-        dto.refinance_49_rate,
-        dto.refinance_49_term_years,
-      );
-
-      const refinancedPaymentsData =
-        AnnualPaymentCalculator.calculateRefinancedPayments(
-          refinancedMonthlyPmt,
-          49,
-        );
-
-      refinancedPayments.push(refinancedPaymentsData);
-    }
-
-    if (dto.refinance_61_rate) {
-      const balanceAt61 = calculateRemainingMortgageBalance(
-        calc_principal,
-        dto.loan_annual_intr,
-        calc_monthlyPmt,
-        61,
-      );
-
-      const refinancedMonthlyPmt = calculateMonthlyPayment(
-        balanceAt61,
-        dto.refinance_61_rate,
-        dto.refinance_61_term_years,
-      );
-
-      const refinancedPaymentsData =
-        AnnualPaymentCalculator.calculateRefinancedPayments(
-          refinancedMonthlyPmt,
-          61,
-        );
-
-      refinancedPayments.push(refinancedPaymentsData);
-    }
 
     //------------------------------Noi Projection---------------------------------//
 
@@ -337,14 +253,7 @@ export class MortgagesService {
       ],
     );
 
-    //---------------------------------Cap Rates-----------------------------------//
-
-    // const calc_capRates = generateMonthlyCapRates(
-    //   dto.purchase_cap_rate, // H18 (e.g., 5.5)
-    //   dto.year_5_cap_rate, // H19 (e.g., 6.0)
-    //   dto.year_7_cap_rate, // H20 (e.g., 6.25)
-    //   dto.year_10_cap_rate,
-    // );
+    //----------------------------Mortgage Calculations ------------------------------//
 
     const calc_capRate2 = generateRefinanceCalculations(
       dto.purchase_cap_rate, // H18 (e.g., 5.5)
@@ -361,13 +270,92 @@ export class MortgagesService {
       calc_monthlyPmt,
     );
 
-    // return { calc_capRate2 };
-    // const result =
-    //   (dto.number_months_intr_only > 0
-    //     ? Math.min(dto.number_months_intr_only, 12)
-    //     : 0) -
-    //   dto.first_month_principal_and_intr_payment +
-    //   1;
+    //----------------------------Payment And Refinance--------------------------------//
+
+    const calc_originalPayments =
+      AnnualPaymentCalculator.calculateOriginalPayments(
+        calc_monthlyPmt,
+        dto.number_months_intr_only,
+        dto.first_month_principal_and_intr_payment,
+      );
+
+    console.log('---------asdasd-asda-asd', calc_capRate2[0].refinancePMT);
+
+    //Refinance Calculations (if applicable)
+    let refinancedPayments = [];
+
+    if (dto.refinance_37_rate) {
+      // const balanceAt37 = calculateRemainingMortgageBalance(
+      //   calc_principal,
+      //   dto.loan_annual_intr,
+      //   calc_monthlyPmt,
+      //   37,
+      // );
+
+      // const refinancedMonthlyPmt = calculateMonthlyPayment(
+      //   balanceAt37,
+      //   dto.refinance_37_rate,
+      //   dto.refinance_37_term_years,
+      // );
+
+      // const refinancedPaymentsData =
+      //   AnnualPaymentCalculator.calculateRefinancedPayments(
+      //     refinancedMonthlyPmt,
+      //     37,
+      //   );
+
+      const refinancedPaymentsData = calculateRefinancedPaymentsNew(
+        calc_capRate2[0].refinancePMT,
+        37,
+      );
+
+      refinancedPayments.push(refinancedPaymentsData);
+    }
+
+    if (dto.refinance_49_rate) {
+      //   const balanceAt49 = calculateRemainingMortgageBalance(
+      //     calc_principal,
+      //     dto.loan_annual_intr,
+      //     calc_monthlyPmt,
+      //     49,
+      //   );
+
+      //   const refinancedMonthlyPmt = calculateMonthlyPayment(
+      //     balanceAt49,
+      //     dto.refinance_49_rate,
+      //     dto.refinance_49_term_years,
+      //   );
+
+      const refinancedPaymentsData =
+        AnnualPaymentCalculator.calculateRefinancedPayments(
+          calc_capRate2[0].refinancePMT,
+          49,
+        );
+
+      refinancedPayments.push(refinancedPaymentsData);
+    }
+
+    if (dto.refinance_61_rate) {
+      //   const balanceAt61 = calculateRemainingMortgageBalance(
+      //     calc_principal,
+      //     dto.loan_annual_intr,
+      //     calc_monthlyPmt,
+      //     61,
+      //   );
+
+      //   const refinancedMonthlyPmt = calculateMonthlyPayment(
+      //     balanceAt61,
+      //     dto.refinance_61_rate,
+      //     dto.refinance_61_term_years,
+      //   );
+
+      const refinancedPaymentsData = calculateRefinancedPaymentsNew(
+        calc_capRate2[1].refinancePMT,
+        61,
+      );
+
+      refinancedPayments.push(refinancedPaymentsData);
+    }
 
     return {
       loanAmount: calc_principal,

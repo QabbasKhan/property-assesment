@@ -202,8 +202,6 @@ export class AnnualPaymentCalculator {
     const payments: number[] = [];
     const monthlyPmt = new Decimal(monthlyPayment).abs();
 
-    console.log(interestOnlyMonths, firstPaymentMonth);
-
     // Year 1 Calculation
     if (interestOnlyMonths > 0) {
       const effectiveMonths = new Decimal(12).minus(interestOnlyMonths);
@@ -234,10 +232,12 @@ export class AnnualPaymentCalculator {
     const refinanceYear = Math.ceil(refinanceMonth / 12);
 
     // First Year of Refinance (Partial Year)
-    if (refinanceYear <= analysisYears) {
-      const monthsPaid = refinanceMonth % 12 || 12;
-      payments.push(monthlyPmt.mul(12 - monthsPaid).toNumber());
-    }
+    // if (refinanceYear <= analysisYears) {
+    //   const monthsPaid = refinanceMonth % 12 || 12;
+    //   payments.push(monthlyPmt.mul(12 - monthsPaid).toNumber());
+    // }
+
+    payments.push(monthlyPmt.mul(12 - 1).toNumber());
 
     // Full Years After Refinance
     const remainingYears = analysisYears - refinanceYear;
@@ -331,12 +331,17 @@ export function generateRefinanceCalculations(
   const step2 = rate84.minus(rate60).div(24);
   const step3 = rate120.minus(rate84).div(36);
 
+  // console.log('rate:', rate0, rate60, rate84);
+
+  // console.log('step1:', step1, step2, step3);
+
   const targetMonths = [37, 60, 84, 120];
 
   for (const month of targetMonths) {
     let capRate: Decimal;
     if (month <= 60) {
       capRate = rate0.plus(step1.mul(month - 1));
+      // console.log(capRate);
     } else if (month <= 84) {
       capRate = rate60.plus(step2.mul(month - 60));
     } else {
@@ -344,30 +349,32 @@ export function generateRefinanceCalculations(
     }
 
     let value: Decimal;
-    let capRatePercent;
+    const capRatePercent = capRate.div(100).toDecimalPlaces(4);
+    // console.log(purchaseCapRate, capRate, capRatePercent);
+
     let NOI;
     if (month == 37) {
-      capRatePercent = capRate.div(100); // convert to decimal
+      // capRatePercent = capRate.div(100).toDecimalPlaces(4); // convert to decimal
       NOI = new Decimal(NOIs[2].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       // console.log(month, NOI);
     } else if (month == 60) {
-      capRatePercent = capRate.div(100); // convert to decimal
+      // capRatePercent = capRate.div(100).toDecimalPlaces(4); // convert to decimal
       NOI = new Decimal(NOIs[5].realizedNoi);
-      // console.log(month, NOI);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
+      // console.log(month, NOI);
     } else if (month == 84) {
-      capRatePercent = capRate.div(100); // convert to decimal
+      // capRatePercent = capRate.div(100).toDecimalPlaces(4); // convert to decimal
       NOI = new Decimal(NOIs[7].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       // console.log(month, NOI);
     } else if (month == 120) {
-      capRatePercent = capRate.div(100); // convert to decimal
+      // capRatePercent = capRate.div(100).toDecimalPlaces(4); // convert to decimal
       NOI = new Decimal(NOIs[9].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       // console.log(month, NOI);
     } else {
-      capRatePercent = capRate.div(100); // convert to decimal
+      // capRatePercent = capRate.div(100).toDecimalPlaces(4); // convert to decimal
       NOI = new Decimal(NOIs[9].realizedNoi);
       value = NOI.div(capRatePercent).toDecimalPlaces(0);
       // console.log(month, NOI);
@@ -411,7 +418,7 @@ export function generateRefinanceCalculations(
 
     capRates.push({
       month,
-      capRate: Number(capRatePercent.toFixed(4)),
+      capRate: Number(capRatePercent),
       value: Number(value),
       mortgage: Number(mortgage),
       feesAndCosts: Number(feesAndCosts),
@@ -422,6 +429,34 @@ export function generateRefinanceCalculations(
   }
 
   return capRates;
+}
+
+//
+export function calculateRefinancedPaymentsNew(
+  refinancedMonthlyPayment: number,
+  refinanceMonth: number,
+  analysisYears: number = 10,
+): { month: string; payments: number[] } {
+  const payments: number[] = [];
+  const monthlyPmt = new Decimal(refinancedMonthlyPayment).abs();
+  const refinanceYear = Math.ceil(refinanceMonth / 12);
+
+  // First Year of Refinance (Partial Year)
+  // if (refinanceYear <= analysisYears) {
+  //   const monthsPaid = refinanceMonth % 12 || 12;
+  //   payments.push(monthlyPmt.mul(12 - monthsPaid).toNumber());
+  // }
+
+  payments.push(monthlyPmt.mul(12 - 1).toNumber());
+
+  // Full Years After Refinance
+  const remainingYears = analysisYears - refinanceYear;
+  for (let year = 1; year <= remainingYears; year++) {
+    payments.push(monthlyPmt.mul(12).toNumber());
+  }
+
+  const month = refinanceMonth.toString();
+  return { month, payments };
 }
 
 //Un used table functions
