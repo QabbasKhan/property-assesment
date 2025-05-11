@@ -29,7 +29,10 @@ export class AnalyticsController {
   }
 
   @Get('/all')
-  async getAll(@Paginate() pagination: Pagination, @Query() query: {search : string, status: string }) {
+  async getAll(
+    @Paginate() pagination: Pagination,
+    @Query() query: { search: string; status: string },
+  ) {
     const data = await this.analyticsService.getAll(pagination, query);
     return { data };
   }
@@ -48,10 +51,11 @@ export class AnalyticsController {
     const data = await this.analyticsService.update(id, updateAnalyticsDto);
     return { data };
   }
-  @Get()
-  findAll() {
-    return this.analyticsService.findAll();
-  }
+
+  // @Delete('/deleteAll')
+  // removeAll() {
+  //   return this.analyticsService.removeMany();
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

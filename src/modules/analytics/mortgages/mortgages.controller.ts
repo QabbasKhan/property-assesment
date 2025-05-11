@@ -21,27 +21,27 @@ export class MortgagesController {
     return { data };
   }
 
-  @Get()
-  findAll() {
-    return this.mortgagesService.findAll();
-  }
-
-  @Get(':id')
+  @Get('/:id')
   async findOne(@Param('id') id: string) {
-    const data = await this.mortgagesService.findOne(id);
+    const data = await this.mortgagesService.calculteMortgageFromId(id);
     return data;
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateMortgageDto: UpdateMortgageDto,
-  ) {
-    return this.mortgagesService.update(+id, updateMortgageDto);
-  }
+  // @Get()
+  // findAll() {
+  //   return this.mortgagesService.findAll();
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.mortgagesService.remove(+id);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateMortgageDto: UpdateMortgageDto,
+  // ) {
+  //   return this.mortgagesService.update(+id, updateMortgageDto);
+  // }
+
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.mortgagesService.remove(+id);
+  // }
 }

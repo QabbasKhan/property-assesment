@@ -22,26 +22,27 @@ export class ValuationsController {
     return { data };
   }
 
-  @Get()
-  findAll() {
-    return this.valuationsService.findAll();
+  @Get('/:id')
+  async findOne(@Param('id') id: string) {
+    const data = await this.valuationsService.calculateValuationFromId(id);
+    return { data };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.valuationsService.findOne(+id);
-  }
+  // @Get()
+  // findAll() {
+  //   return this.valuationsService.findAll();
+  // }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateValuationDto: UpdateValuationDto,
-  ) {
-    return this.valuationsService.update(+id, updateValuationDto);
-  }
+  // @Patch(':id')
+  // update(
+  //   @Param('id') id: string,
+  //   @Body() updateValuationDto: UpdateValuationDto,
+  // ) {
+  //   return this.valuationsService.update(+id, updateValuationDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.valuationsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.valuationsService.remove(+id);
+  // }
 }

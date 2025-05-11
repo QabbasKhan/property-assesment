@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { CreateAnalyticsDto } from './dto/create-analytics.dto';
 import { UpdateAnalyticsDto } from './dto/update-analytics.dto';
 import { ValuationsService } from './valuations/valuations.service';
@@ -11,25 +16,33 @@ import { Pagination } from 'src/common/utils/types.util';
 @Injectable()
 export class AnalyticsService {
   constructor(
-    private readonly valuationsService: ValuationsService,
-    private readonly mortgageService: MortgagesService,
-    @InjectModel(Analytics.name) private readonly Analytic: Model<any>,
+    // @Inject(forwardRef(() => ValuationsService))
+    // private readonly valuationsService: ValuationsService,
+    // private readonly mortgageService: MortgagesService,
+    // @Inject(forwardRef(() => ValuationsService))
+    @InjectModel(Analytics.name)
+    private readonly Analytic: Model<any>,
   ) {}
 
   async create(createAnalyticsDto: CreateAnalyticsDto) {
     return await this.Analytic.create(createAnalyticsDto);
   }
 
-  async getAll(pagination: Pagination, query: { search: string, status: string}) {
+  async getAll(
+    pagination: Pagination,
+    query: { search: string; status: string },
+  ) {
     const dbQuery = {
-          ...(!!query.search && { location: { $regex: query.search, $options: 'i' } }),
-          ...(!!query.status && query.status !== 'all' && {status: query.status})
-        };
+      ...(!!query.search && { name: { $regex: query.search, $options: 'i' } }),
+      ...(!!query.status && query.status !== 'all' && { status: query.status }),
+    };
 
-        const data = await this.Analytic.find(dbQuery).skip(pagination.skip).limit(pagination.limit)
-        const totalCount = await this.Analytic.countDocuments(dbQuery)
+    const data = await this.Analytic.find(dbQuery)
+      .skip(pagination.skip)
+      .limit(pagination.limit);
+    const totalCount = await this.Analytic.countDocuments(dbQuery);
 
-        return {data, totalCount}
+    return { data, totalCount };
   }
 
   async findOne(id: string) {
@@ -46,9 +59,17 @@ export class AnalyticsService {
     return data;
   }
 
-  findAll() {
-    return `This action returns all analytics`;
+  async findOneHelper(filter) {
+    const data = await this.Analytic.findOne(filter);
+    return data;
   }
+
+  // async removeMany() {
+  //   await this.Analytic.deleteMany({
+  //     name: { $ne: 'Caton Plaza - Clanton AL' },
+  //   });
+  // }
+
   async remove(id: string) {
     await this.Analytic.findByIdAndDelete(id);
     return { message: 'Deleted' };
