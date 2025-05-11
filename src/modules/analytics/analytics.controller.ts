@@ -28,7 +28,7 @@ export class AnalyticsController {
     return { data };
   }
 
-  @Post('/all')
+  @Get('/all')
   async getAll(@Paginate() pagination: Pagination, @Query() query: {search : string, status: string }) {
     const data = await this.analyticsService.getAll(pagination, query);
     return { data };
