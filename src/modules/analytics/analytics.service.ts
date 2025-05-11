@@ -22,14 +22,14 @@ export class AnalyticsService {
 
   async getAll(pagination: Pagination, query: { search: string, status: string}) {
     const dbQuery = {
-          ...(!!query.search && { saveAs: { $regex: query.search, $options: 'i' } }),
+          ...(!!query.search && { location: { $regex: query.search, $options: 'i' } }),
           ...(!!query.status && query.status !== 'all' && {status: query.status})
         };
 
         const data = await this.Analytic.find(dbQuery).skip(pagination.skip).limit(pagination.limit)
-        const totalAmount = await this.Analytic.countDocuments(dbQuery)
+        const totalCount = await this.Analytic.countDocuments(dbQuery)
 
-        return {data, totalAmount}
+        return {data, totalCount}
   }
 
   async findOne(id: string) {
