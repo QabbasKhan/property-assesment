@@ -500,7 +500,7 @@ export class MortgagesService {
 
       const refinancedPaymentsData =
         AnnualPaymentCalculator.calculateRefinancedPayments(
-          calc_capRate2[0].refinancePMT,
+          calc_capRate2[1].refinancePMT,
           49,
         );
 
@@ -522,7 +522,7 @@ export class MortgagesService {
       //   );
 
       const refinancedPaymentsData = calculateRefinancedPaymentsNew(
-        calc_capRate2[1].refinancePMT,
+        calc_capRate2[2].refinancePMT,
         61,
       );
 
