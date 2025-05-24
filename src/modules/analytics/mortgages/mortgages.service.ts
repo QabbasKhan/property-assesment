@@ -280,6 +280,7 @@ export class MortgagesService {
         calc_monthlyPmt,
         dto.number_months_intr_only,
         dto.first_month_principal_and_intr_payment,
+        calc_interestOnlyPayment,
       );
 
     console.log('---------asdasd-asda-asd', calc_capRate2[0].refinancePMT);
@@ -447,6 +448,7 @@ export class MortgagesService {
         calc_monthlyPmt,
         dto.number_months_intr_only,
         dto.first_month_principal_and_intr_payment,
+        calc_interestOnlyPayment,
       );
 
     console.log('---------asdasd-asda-asd', calc_capRate2[0].refinancePMT);

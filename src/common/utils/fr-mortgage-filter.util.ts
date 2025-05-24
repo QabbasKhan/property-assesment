@@ -197,24 +197,76 @@ export class AnnualPaymentCalculator {
     monthlyPayment: number,
     interestOnlyMonths: number,
     firstPaymentMonth: number,
+    interestOnlyPayment: number,
     analysisYears: number = 10,
   ): number[] {
     const payments: number[] = [];
     const monthlyPmt = new Decimal(monthlyPayment).abs();
+    const interestOnlyPmt = new Decimal(interestOnlyPayment);
+
+    //-----------------------------------------old-----------------------------------------//
 
     // Year 1 Calculation
-    if (interestOnlyMonths > 0) {
-      const effectiveMonths = new Decimal(12).minus(interestOnlyMonths);
-      payments.push(monthlyPmt.mul(effectiveMonths).toNumber());
-      // console.log(effectiveMonths, interestOnlyMonths, monthlyPayment);
-    } else {
-      payments.push(monthlyPmt.mul(12).toNumber());
+    // if (interestOnlyMonths > 0) {
+    //   const effectiveMonths = new Decimal(12).minus(interestOnlyMonths);
+    //   payments.push(monthlyPmt.mul(effectiveMonths).toNumber());
+    //   // console.log(effectiveMonths, interestOnlyMonths, monthlyPayment);
+    // } else {
+    //   payments.push(monthlyPmt.mul(12).toNumber());
+    // }
+
+    // // Years 2-10
+    // for (let year = 2; year <= analysisYears; year++) {
+    //   payments.push(monthlyPmt.mul(12).toNumber());
+    // }
+    //-----------------------------------------old-----------------------------------------//
+
+    //-----------------------------------------new-----------------------------------------//
+
+    // Interest-only months per year
+    const year1IOMonths =
+      interestOnlyMonths > 0
+        ? Math.max(0, Math.min(12, interestOnlyMonths) - firstPaymentMonth + 1)
+        : 0;
+
+    const year2IOMonths =
+      interestOnlyMonths > 12
+        ? interestOnlyMonths < 25
+          ? interestOnlyMonths - 12
+          : interestOnlyMonths < 36
+            ? 12
+            : 0
+        : 0;
+
+    const year3IOMonths = interestOnlyMonths > 24 ? interestOnlyMonths - 24 : 0;
+
+    // console.log(year1IOMonths, year2IOMonths, year3IOMonths);
+
+    for (let year = 1; year <= analysisYears; year++) {
+      let ioMonths = 0;
+      let piMonth = new Decimal(12);
+      if (year === 1) {
+        ioMonths = year1IOMonths;
+        piMonth = new Decimal(12)
+          .minus(firstPaymentMonth)
+          .add(1)
+          .minus(ioMonths);
+      } else if (year === 2) {
+        ioMonths = year2IOMonths;
+        piMonth = new Decimal(12).minus(ioMonths);
+      } else if (year === 3) {
+        ioMonths = year3IOMonths;
+        piMonth = new Decimal(12).minus(ioMonths);
+      }
+
+      // console.log(year, ioMonths, piMonth);
+
+      const mortgage = monthlyPmt.mul(piMonth);
+      const toAdd = interestOnlyPmt.mul(ioMonths);
+      payments.push(mortgage.add(toAdd).toNumber());
     }
 
-    // Years 2-10
-    for (let year = 2; year <= analysisYears; year++) {
-      payments.push(monthlyPmt.mul(12).toNumber());
-    }
+    //-----------------------------------------new-----------------------------------------//
 
     return payments;
   }

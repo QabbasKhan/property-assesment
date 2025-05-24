@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   AnnualPaymentCalculator,
+  calculateInterestOnlyPayment,
   calculateMonthlyInterestRate,
   calculateMonthlyPayment,
   calculateRemainingMortgageBalance,
@@ -97,11 +98,17 @@ export class ValuationsService {
       calc_totalPayments,
     );
 
+    const calc_interestOnlyPayment = calculateInterestOnlyPayment(
+      calc_principal,
+      dto.loan_annual_intr, // D14
+    );
+
     const calc_originalPayments =
       AnnualPaymentCalculator.calculateOriginalPayments(
         calc_monthlyPmt,
         dto.number_months_intr_only,
         dto.first_month_principal_and_intr_payment,
+        calc_interestOnlyPayment,
       );
     //---------------------------------------------------------//
 
@@ -360,8 +367,6 @@ export class ValuationsService {
     const dto = await this.analyticsService.findOneHelper({ _id: id });
     if (!dto) throw new BadRequestException('No Input Found');
 
-    console.log('1');
-
     const {
       asking_price,
       offer_perc,
@@ -370,16 +375,11 @@ export class ValuationsService {
       reserved_amount,
     } = dto;
 
-    console.log(dto);
-
     const calc_monthlyRate = calculateMonthlyInterestRate(dto.loan_annual_intr); // D14
-    console.log('2');
 
     const calc_totalPayments = calculateTotalPayments(dto.loan_terms_inyear);
-    console.log('3');
 
     const calc_purchasePrice = calculatePurchasePrice(asking_price, offer_perc);
-    console.log('4');
 
     const calc_principal = mortgageLoanPrincipal(
       dto.asking_price, // D6
@@ -387,18 +387,9 @@ export class ValuationsService {
       dto.financing_ltv_perc,
     );
 
-    console.log('5');
-
     const calc_downPayment = calculateDownPayment(
       calc_purchasePrice,
       calc_principal,
-    );
-
-    console.log(
-      '6',
-      calc_downPayment,
-      bank_fee_and_closing_cost,
-      reserved_amount,
     );
 
     const calc_investment = calculateInvestment(
@@ -406,8 +397,6 @@ export class ValuationsService {
       bank_fee_and_closing_cost,
       reserved_amount,
     );
-
-    console.log('7');
 
     const calc_noiProjections = NoiProjectionCalculator.calculateProjections(
       dto.noi, // D9
@@ -427,8 +416,6 @@ export class ValuationsService {
       ],
     );
 
-    console.log('8');
-
     //-----------------------helpers--------------------------//
     // const calc_principal = mortgageLoanPrincipal(
     //   dto.asking_price, // D6
@@ -441,11 +428,17 @@ export class ValuationsService {
       calc_totalPayments,
     );
 
+    const calc_interestOnlyPayment = calculateInterestOnlyPayment(
+      calc_principal,
+      dto.loan_annual_intr, // D14
+    );
+
     const calc_originalPayments =
       AnnualPaymentCalculator.calculateOriginalPayments(
         calc_monthlyPmt,
         dto.number_months_intr_only,
         dto.first_month_principal_and_intr_payment,
+        calc_interestOnlyPayment,
       );
     //---------------------------------------------------------//
 
@@ -712,11 +705,17 @@ export class ValuationsService {
       dto.loan_terms_inyear,
     );
 
+    const calc_interestOnlyPayment = calculateInterestOnlyPayment(
+      calc_principal,
+      dto.loan_annual_intr, // D14
+    );
+
     const calc_originalPayments =
       AnnualPaymentCalculator.calculateOriginalPayments(
         calc_monthlyPmt,
         dto.number_months_intr_only,
         dto.first_month_principal_and_intr_payment,
+        calc_interestOnlyPayment,
       );
 
     let refinancedPayments = [];
