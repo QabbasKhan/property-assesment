@@ -494,13 +494,40 @@ export function calculateCompleteNoRefinance(
     .toNumber();
 
   // 8. Calculate IRR
-  const irrCashFlows = [
-    -investment, // Initial investment (negative)
-    ...annualCashFlows.map((flow) => flow.cashFlow),
-    cashFlowFromClosing + investment,
-  ];
 
-  const irrValue = new Decimal(irr(irrCashFlows) * 100)
+  let irrCashFlows;
+
+  if (years == 5) {
+    irrCashFlows = [
+      -investment, // Initial investment (negative)
+      ...annualCashFlows.map((flow) => flow.cashFlow),
+      cashFlowFromClosing + investment,
+    ];
+  } else if (years == 7) {
+    irrCashFlows = [
+      -investment, // Initial investment (negative)
+      ...annualCashFlows.map((flow) => flow.cashFlow),
+      cashFlowFromClosing,
+      cashFlowFromClosing + investment,
+    ];
+  } else if (years == 10) {
+    irrCashFlows = [
+      -investment, // Initial investment (negative)
+      ...annualCashFlows.map((flow) => flow.cashFlow),
+      cashFlowFromClosing,
+      cashFlowFromClosing + investment,
+    ];
+  }
+
+  // const irrCashFlows = [
+  //   -investment, // Initial investment (negative)
+  //   ...annualCashFlows.map((flow) => flow.cashFlow),
+  //   cashFlowFromClosing + investment,
+  // ];
+
+  console.log(irrCashFlows);
+
+  const irrValue = new Decimal(irr(irrCashFlows, 0.1) * 100)
     .toDecimalPlaces(2)
     .toNumber();
 

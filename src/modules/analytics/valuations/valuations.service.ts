@@ -666,7 +666,7 @@ export class ValuationsService {
       dto.syndi_sale_price_fee,
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
-      5,
+      10,
       calc_principal,
       dto.loan_annual_intr,
       calc_monthlyPmt,
