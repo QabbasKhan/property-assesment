@@ -58,8 +58,10 @@ export class NoiProjectionCalculator {
 
       // Calculate Realized NOI with occupancy adjustment
       const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
-      const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
-      const realizedNoi = targetNoi.mul(occupancyAdjustment);
+      // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
+      // const realizedNoi = targetNoi.mul(occupancyAdjustment);
+      const step1 = targetNoi.div(baseOccupancy);
+      const realizedNoi = step1.mul(currentOccupancy);
 
       projections.push({
         targetNoi: targetNoi.toDecimalPlaces(0).toNumber(),
