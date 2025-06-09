@@ -346,9 +346,6 @@ export function calculateWithRefinance(
   const annualCashFlows = [];
   let refinanceData: number[] | null = null;
   let refinanceStartYear = 0;
-  let capitalLift_dec = new Decimal(capitalLift);
-
-  let refinancePayout = 0;
 
   // Find the matching refinance data if refinanceMonth is provided
   if (refinanceMonth !== null) {
@@ -361,6 +358,8 @@ export function calculateWithRefinance(
   }
 
   for (let year = 0; year < years; year++) {
+    let refinancePayout = 0;
+
     const noiValue = new Decimal(noiProjection[year]?.realizedNoi || 0);
     const propertyManagementFee = noiValue
       .div(0.2)
@@ -375,7 +374,7 @@ export function calculateWithRefinance(
       const refinanceYearIndex = year - refinanceStartYear;
       debtService = new Decimal(refinanceData[refinanceYearIndex] || 0);
 
-      if (refinancePayout == 0) {
+      if (year == refinanceStartYear) {
         refinancePayout = capitalLift;
       }
     } else {
