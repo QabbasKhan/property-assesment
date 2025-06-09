@@ -301,6 +301,18 @@ export function calculateNoRefinance(
     }
     cashFlow = cashFlow.minus(debtService).toDecimalPlaces(0);
 
+    // if (year == 0) {
+    //   console.log(
+    //     cashFlow,
+    //     noiValue,
+    //     propManagerFees,
+    //     aumFee,
+    //     debtService,
+    //     dynamicTwo,
+    //     dynamicOne,
+    //   );
+    // }
+
     annualCashFlows.push({
       year: year + 1,
       noi: noiValue.toDecimalPlaces(0).toNumber(),
@@ -327,20 +339,25 @@ export function calculateWithRefinance(
   },
   dynamicOne: string, // Determines if property management fees apply
   dynamicTwo: string, // Determines if AUM fees apply
+  capitalLift: number,
   years: number, // Analysis period (5, 7, or 10 years)
   refinanceMonth: number | null, // Month when refinance occurs (37, 49, 61) or null for no refinance
 ) {
   const annualCashFlows = [];
   let refinanceData: number[] | null = null;
   let refinanceStartYear = 0;
+  let capitalLift_dec = new Decimal(capitalLift);
+
+  let refinancePayout = 0;
 
   // Find the matching refinance data if refinanceMonth is provided
   if (refinanceMonth !== null) {
     const refinanceOption = primaryAndRefinanceData.refinanced.find(
       (r) => parseInt(r.month) === refinanceMonth,
     );
+
     refinanceData = refinanceOption?.payments || null;
-    refinanceStartYear = Math.ceil(refinanceMonth / 12); // Convert month to starting year
+    refinanceStartYear = Math.floor(refinanceMonth / 12); // Convert month to starting year
   }
 
   for (let year = 0; year < years; year++) {
@@ -357,6 +374,10 @@ export function calculateWithRefinance(
       // Use refinanced payments (adjusting for the year offset)
       const refinanceYearIndex = year - refinanceStartYear;
       debtService = new Decimal(refinanceData[refinanceYearIndex] || 0);
+
+      if (refinancePayout == 0) {
+        refinancePayout = capitalLift;
+      }
     } else {
       // Use primary payments
       debtService = new Decimal(primaryAndRefinanceData.primary[year] || 0);
@@ -364,13 +385,27 @@ export function calculateWithRefinance(
 
     // Calculate cash flow with conditional fee application
     let cashFlow = noiValue;
-    if (dynamicOne === DROP_DOWN.YES) {
+    if (dynamicTwo === DROP_DOWN.YES) {
       cashFlow = cashFlow.minus(propertyManagementFee);
     }
-    if (dynamicTwo === DROP_DOWN.YES) {
+    if (dynamicOne === DROP_DOWN.YES) {
       cashFlow = cashFlow.minus(aumFee);
     }
-    cashFlow = cashFlow.plus(debtService);
+    cashFlow = cashFlow
+      .minus(debtService)
+      .add(refinancePayout)
+      .toDecimalPlaces(0);
+
+    // if (years == 5) {
+    //   console.log(
+    //     year,
+    //     refinanceStartYear,
+    //     refinancePayout,
+    //     cashFlow,
+    //     propManagerFees,
+    //     debtService,
+    //   );
+    // }
 
     annualCashFlows.push({
       year: year + 1,
@@ -526,8 +561,6 @@ export function calculateCompleteNoRefinance(
   //   ...annualCashFlows.map((flow) => flow.cashFlow),
   //   cashFlowFromClosing + investment,
   // ];
-
-  console.log(irrCashFlows);
 
   const irrValue = new Decimal(irr(irrCashFlows, 0.1) * 100)
     .toDecimalPlaces(2)

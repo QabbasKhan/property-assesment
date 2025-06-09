@@ -449,31 +449,10 @@ export class MortgagesService {
         calc_interestOnlyPayment,
       );
 
-    console.log('---------asdasd-asda-asd', calc_capRate2[0].refinancePMT);
-
     //Refinance Calculations (if applicable)
     let refinancedPayments = [];
 
     if (dto.refinance_37_rate) {
-      // const balanceAt37 = calculateRemainingMortgageBalance(
-      //   calc_principal,
-      //   dto.loan_annual_intr,
-      //   calc_monthlyPmt,
-      //   37,
-      // );
-
-      // const refinancedMonthlyPmt = calculateMonthlyPayment(
-      //   balanceAt37,
-      //   dto.refinance_37_rate,
-      //   dto.refinance_37_term_years,
-      // );
-
-      // const refinancedPaymentsData =
-      //   AnnualPaymentCalculator.calculateRefinancedPayments(
-      //     refinancedMonthlyPmt,
-      //     37,
-      //   );
-
       const refinancedPaymentsData = calculateRefinancedPaymentsNew(
         calc_capRate2[0].refinancePMT,
         37,
@@ -483,42 +462,15 @@ export class MortgagesService {
     }
 
     if (dto.refinance_49_rate) {
-      //   const balanceAt49 = calculateRemainingMortgageBalance(
-      //     calc_principal,
-      //     dto.loan_annual_intr,
-      //     calc_monthlyPmt,
-      //     49,
-      //   );
-
-      //   const refinancedMonthlyPmt = calculateMonthlyPayment(
-      //     balanceAt49,
-      //     dto.refinance_49_rate,
-      //     dto.refinance_49_term_years,
-      //   );
-
-      const refinancedPaymentsData =
-        AnnualPaymentCalculator.calculateRefinancedPayments(
-          calc_capRate2[1].refinancePMT,
-          49,
-        );
+      const refinancedPaymentsData = calculateRefinancedPaymentsNew(
+        calc_capRate2[1].refinancePMT,
+        49,
+      );
 
       refinancedPayments.push(refinancedPaymentsData);
     }
 
     if (dto.refinance_61_rate) {
-      //   const balanceAt61 = calculateRemainingMortgageBalance(
-      //     calc_principal,
-      //     dto.loan_annual_intr,
-      //     calc_monthlyPmt,
-      //     61,
-      //   );
-
-      //   const refinancedMonthlyPmt = calculateMonthlyPayment(
-      //     balanceAt61,
-      //     dto.refinance_61_rate,
-      //     dto.refinance_61_term_years,
-      //   );
-
       const refinancedPaymentsData = calculateRefinancedPaymentsNew(
         calc_capRate2[2].refinancePMT,
         61,
