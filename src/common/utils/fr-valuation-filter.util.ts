@@ -108,79 +108,79 @@ export function calculateNetProceeds(
   return results;
 }
 
-export function calculateExitValuations(
-  mortgageData: any[],
-  noiResults5yr: any, // NOI results for 5 years
-  noiResults7yr: any, // NOI results for 7 years
-  noiResults10yr: any, // NOI results for 10 years
-  investmentAmount: number, // C7
-  preferredReturnPerc: number, // D25
-  waterfallSharePerc: number, // D26
-  syndiFeePercent: number, // D34
-  transactionFeePercent: number, // D35
-  realtorFeePercent: number, // D36
-  principal: number,
-  annualInterest: number,
-  monthlyPayment: number,
-): [] {
-  const results = [];
+// export function calculateExitValuations(
+//   mortgageData: any[],
+//   noiResults5yr: any, // NOI results for 5 years
+//   noiResults7yr: any, // NOI results for 7 years
+//   noiResults10yr: any, // NOI results for 10 years
+//   investmentAmount: number, // C7
+//   preferredReturnPerc: number, // D25
+//   waterfallSharePerc: number, // D26
+//   syndiFeePercent: number, // D34
+//   transactionFeePercent: number, // D35
+//   realtorFeePercent: number, // D36
+//   principal: number,
+//   annualInterest: number,
+//   monthlyPayment: number,
+// ): [] {
+//   const results = [];
 
-  // Calculate for 5th year (month 60)
-  const year5 = calculateSingleExitValuation(
-    mortgageData,
-    noiResults5yr,
-    investmentAmount,
-    preferredReturnPerc,
-    waterfallSharePerc,
-    syndiFeePercent,
-    transactionFeePercent,
-    realtorFeePercent,
-    60,
-    5,
-    principal,
-    annualInterest,
-    monthlyPayment,
-  );
-  if (year5) results.push(year5);
+//   // Calculate for 5th year (month 60)
+//   const year5 = calculateSingleExitValuation(
+//     mortgageData,
+//     noiResults5yr,
+//     investmentAmount,
+//     preferredReturnPerc,
+//     waterfallSharePerc,
+//     syndiFeePercent,
+//     transactionFeePercent,
+//     realtorFeePercent,
+//     60,
+//     5,
+//     principal,
+//     annualInterest,
+//     monthlyPayment,
+//   );
+//   if (year5) results.push(year5);
 
-  // Calculate for 7th year (month 84)
-  const year7 = calculateSingleExitValuation(
-    mortgageData,
-    noiResults7yr,
-    investmentAmount,
-    preferredReturnPerc,
-    waterfallSharePerc,
-    syndiFeePercent,
-    transactionFeePercent,
-    realtorFeePercent,
-    84,
-    7,
-    principal,
-    annualInterest,
-    monthlyPayment,
-  );
-  if (year7) results.push(year7);
+//   // Calculate for 7th year (month 84)
+//   const year7 = calculateSingleExitValuation(
+//     mortgageData,
+//     noiResults7yr,
+//     investmentAmount,
+//     preferredReturnPerc,
+//     waterfallSharePerc,
+//     syndiFeePercent,
+//     transactionFeePercent,
+//     realtorFeePercent,
+//     84,
+//     7,
+//     principal,
+//     annualInterest,
+//     monthlyPayment,
+//   );
+//   if (year7) results.push(year7);
 
-  // Calculate for 10th year (month 120)
-  const year10 = calculateSingleExitValuation(
-    mortgageData,
-    noiResults10yr,
-    investmentAmount,
-    preferredReturnPerc,
-    waterfallSharePerc,
-    syndiFeePercent,
-    transactionFeePercent,
-    realtorFeePercent,
-    120,
-    10,
-    principal,
-    annualInterest,
-    monthlyPayment,
-  );
-  if (year10) results.push(year10);
+//   // Calculate for 10th year (month 120)
+//   const year10 = calculateSingleExitValuation(
+//     mortgageData,
+//     noiResults10yr,
+//     investmentAmount,
+//     preferredReturnPerc,
+//     waterfallSharePerc,
+//     syndiFeePercent,
+//     transactionFeePercent,
+//     realtorFeePercent,
+//     120,
+//     10,
+//     principal,
+//     annualInterest,
+//     monthlyPayment,
+//   );
+//   if (year10) results.push(year10);
 
-  return results as any;
-}
+//   return results as any;
+// }
 
 export function calculateSingleExitValuation(
   mortgageData: any[],
@@ -328,6 +328,231 @@ export function calculateNoRefinance(
   return annualCashFlows;
 }
 
+export function calculateCompleteNoRefinance(
+  noiProjection: any[],
+  propManagerFees: number,
+  investment: number,
+  syndiAumFee: number,
+  primaryData: any[],
+  dynamicOne: string,
+  dynamicTwo: string,
+  mortgageData: any[],
+  preferredReturnPerc: number,
+  waterfallSharePerc: number,
+  syndiFeePercent: number,
+  transactionFeePercent: number,
+  realtorFeePercent: number,
+  years: number,
+  principal: number,
+  annualInterest: number,
+  monthlyPayment: number,
+) {
+  // 1. Calculate annual cash flows
+  const annualCashFlows = calculateNoRefinance(
+    noiProjection,
+    propManagerFees,
+    investment,
+    syndiAumFee,
+    primaryData,
+    dynamicOne,
+    dynamicTwo,
+    years,
+  );
+
+  // 2. Calculate exit valuation
+  const targetMonth = years * 12; // 60, 84, or 120
+  const exitValuation = calculateSingleExitValuation(
+    mortgageData,
+    annualCashFlows,
+    investment,
+    preferredReturnPerc,
+    waterfallSharePerc,
+    syndiFeePercent,
+    transactionFeePercent,
+    realtorFeePercent,
+    targetMonth,
+    years,
+    principal,
+    annualInterest,
+    monthlyPayment,
+  );
+
+  if (!exitValuation) {
+    throw new Error(`No mortgage data found for ${years} year exit`);
+  }
+
+  // 3. Calculate cash flow from closing (Total Due Investor)
+  const cashFlowFromClosing = new Decimal(exitValuation.lpPayment)
+    .toDecimalPlaces(0)
+    .toNumber();
+
+  // 4. Calculate cash flow total (sum of annual + closing + investment)
+  const totalAnnualCashFlow = annualCashFlows.reduce(
+    (sum, flow) => sum.plus(new Decimal(flow.cashFlow)),
+    new Decimal(0),
+  );
+  const cashFlowTotal = totalAnnualCashFlow
+    .plus(cashFlowFromClosing)
+    .plus(investment)
+    .toDecimalPlaces(0)
+    .toNumber();
+
+  // 5. Calculate cash-on-cash returns
+  const investmentDec = new Decimal(investment);
+  const cashFlowsWithCoc = annualCashFlows.map((flow) => ({
+    ...flow,
+    noi: new Decimal(flow.noi).toDecimalPlaces(0).toNumber(),
+    propertyManagementFee: new Decimal(flow.propertyManagementFee)
+      .toDecimalPlaces(0)
+      .toNumber(),
+    aumFee: new Decimal(flow.aumFee).toDecimalPlaces(2).toNumber(),
+    cashFlow: new Decimal(flow.cashFlow).toDecimalPlaces(0).toNumber(),
+    cashOnCashReturn:
+      investment > 0
+        ? new Decimal(flow.cashFlow)
+            .div(investmentDec)
+            .mul(100)
+            .toDecimalPlaces(2)
+            .toNumber()
+        : 0,
+  }));
+
+  // 6. Calculate average cash-on-cash
+  const averageCashOnCash = new Decimal(
+    cashFlowsWithCoc.reduce((sum, flow) => sum + flow.cashOnCashReturn, 0) /
+      years,
+  )
+    .toDecimalPlaces(0)
+    .toNumber();
+
+  // 7. Calculate total and annualized return
+  const totalReturn = new Decimal(cashFlowTotal)
+    .div(investment)
+    .mul(100)
+    .toDecimalPlaces(0)
+    .toNumber();
+  const annualizedReturn = new Decimal(totalReturn)
+    .div(years)
+    .toDecimalPlaces(0)
+    .toNumber();
+
+  // 8. Calculate IRR
+
+  let irrCashFlows;
+
+  if (years == 5) {
+    irrCashFlows = [
+      -investment, // Initial investment (negative)
+      ...annualCashFlows.map((flow) => flow.cashFlow),
+      cashFlowFromClosing + investment,
+    ];
+  } else if (years == 7) {
+    irrCashFlows = [
+      -investment, // Initial investment (negative)
+      ...annualCashFlows.map((flow) => flow.cashFlow),
+      cashFlowFromClosing,
+      cashFlowFromClosing + investment,
+    ];
+  } else if (years == 10) {
+    irrCashFlows = [
+      -investment, // Initial investment (negative)
+      ...annualCashFlows.map((flow) => flow.cashFlow),
+      cashFlowFromClosing,
+      cashFlowFromClosing + investment,
+    ];
+  }
+
+  // const irrCashFlows = [
+  //   -investment, // Initial investment (negative)
+  //   ...annualCashFlows.map((flow) => flow.cashFlow),
+  //   cashFlowFromClosing + investment,
+  // ];
+
+  const irrValue = new Decimal(irr(irrCashFlows, 0.1) * 100)
+    .toDecimalPlaces(2)
+    .toNumber();
+
+  return {
+    annualCashFlows: cashFlowsWithCoc,
+    cashFlowFromClosing,
+    cashFlowTotal,
+    averageCashOnCash,
+    totalReturn,
+    annualizedReturn,
+    irr: irrValue,
+  };
+}
+
+export function calculateSingleExitValuationWithRefinance(
+  mortgageData: any[],
+  noRefinanceResults: any[],
+  investmentAmount: number,
+  preferredReturnPerc: number,
+  waterfallSharePerc: number,
+  syndiFeePercent: number,
+  transactionFeePercent: number,
+  realtorFeePercent: number,
+  targetMonth: number,
+  exitMonth: number,
+  targetYear: number,
+) {
+  // 1. Get sale price from mortgage data
+  const mortgageEntry = mortgageData.find((d) => d.month === targetMonth);
+  if (!mortgageEntry) return null;
+
+  const salePrice = new Decimal(mortgageEntry.value);
+
+  // 2. Calculate net proceeds
+  const totalFeePercent = new Decimal(syndiFeePercent)
+    .plus(transactionFeePercent)
+    .plus(realtorFeePercent)
+    .div(100);
+
+  const sellingCosts = salePrice.mul(totalFeePercent);
+
+  const mortgage = calculateRemainingMortgageBalance(
+    mortgageEntry.mortgage,
+    mortgageEntry.refinancePMT,
+    targetMonth,
+    exitMonth,
+  );
+
+  const netProceeds = salePrice.minus(sellingCosts).minus(mortgage);
+
+  // 3. Calculate total due investor
+
+  const totalDividendsPaid = calculateTotalDividendsPaid(noRefinanceResults);
+  const preferredDividend = new Decimal(investmentAmount)
+    .mul(preferredReturnPerc)
+    .div(100)
+    .mul(targetYear);
+
+  const totalDueInvestor = preferredDividend
+    .plus(investmentAmount) // Return of capital
+    .minus(totalDividendsPaid); // Subtract dividends already paid
+
+  // 4. Calculate excess capital gains
+  // const excessCapitalGains = netProceeds.plus(totalDueInvestor);
+  const excessCapitalGains = netProceeds.minus(totalDueInvestor);
+
+  // 5. Calculate LP payment (waterfall)
+  const lpPayment = excessCapitalGains.mul(waterfallSharePerc).div(100);
+
+  // 6. Calculate GP share
+  const gpShare = excessCapitalGains.minus(lpPayment);
+
+  return {
+    year: targetYear,
+    salePrice: salePrice.toDecimalPlaces(0).toNumber(),
+    sellingCosts: sellingCosts.toDecimalPlaces(0).toNumber(),
+    netProceeds: netProceeds.toDecimalPlaces(0).toNumber(),
+    totalDueInvestor: totalDueInvestor.toDecimalPlaces(0).toNumber(),
+    excessCapitalGains: excessCapitalGains.toDecimalPlaces(0).toNumber(),
+    lpPayment: lpPayment.toDecimalPlaces(0).toNumber(),
+    gpShare: gpShare.toDecimalPlaces(0).toNumber(),
+  };
+}
+
 export function calculateWithRefinance(
   noiProjection: any[], // row17
   propManagerFees: number, // Property manager fee percentage
@@ -421,40 +646,63 @@ export function calculateWithRefinance(
   return annualCashFlows;
 }
 
-export function calculateCompleteNoRefinance(
-  noiProjection: any[],
-  propManagerFees: number,
+// export function calculateCompleteWithRefinance() {}
+
+export function calculateRemainingMortgageBalanceWithRefinance(
+  refMortgage: number,
+  monthlyPayment: number,
+  annualIncrease: number,
+  targetMonth: number, //mortgage row 13:24
+  refMonth: number, //mortgage row 37:128
+) {
+  const r = new Decimal(targetMonth);
+  const t = new Decimal(refMonth);
+  let P = new Decimal(refMortgage);
+  const i = new Decimal(annualIncrease);
+  const pmt = new Decimal(monthlyPayment);
+
+  if (t.lt(r)) return 0;
+  if (t.eq(r)) return P.toNumber();
+
+  // Calculate monthly rate
+  const monthlyRate = i.plus(1).pow(new Decimal(1)).minus(1);
+
+  // Calculate each month sequentially
+  for (let m = r.plus(1); m.lte(t); m = m.plus(1)) {
+    P = P.times(monthlyRate.plus(1)).minus(pmt);
+  }
+
+  return P.toNumber();
+}
+
+export function calculateCompleteWithRefinance(
+  withRefinanceCalculations: any[],
+  // noiProjection: any[],
+  // propManagerFees: number,
   investment: number,
-  syndiAumFee: number,
-  primaryData: any[],
-  dynamicOne: string,
-  dynamicTwo: string,
+  // syndiAumFee: number,
+  // primaryData: any[],
+  // dynamicOne: string,
+  // dynamicTwo: string,
   mortgageData: any[],
   preferredReturnPerc: number,
   waterfallSharePerc: number,
   syndiFeePercent: number,
   transactionFeePercent: number,
   realtorFeePercent: number,
+  targetMonth: number,
+  exitMonth: number,
   years: number,
-  principal: number,
-  annualInterest: number,
-  monthlyPayment: number,
+  // principal: number,
+  // annualInterest: number,
+  // monthlyPayment: number,
 ) {
   // 1. Calculate annual cash flows
-  const annualCashFlows = calculateNoRefinance(
-    noiProjection,
-    propManagerFees,
-    investment,
-    syndiAumFee,
-    primaryData,
-    dynamicOne,
-    dynamicTwo,
-    years,
-  );
+  const annualCashFlows = withRefinanceCalculations;
 
   // 2. Calculate exit valuation
-  const targetMonth = years * 12; // 60, 84, or 120
-  const exitValuation = calculateSingleExitValuation(
+  // const targetMonth = years * 12; // 60, 84, or 120
+  const exitValuation = calculateSingleExitValuationWithRefinance(
     mortgageData,
     annualCashFlows,
     investment,
@@ -464,10 +712,8 @@ export function calculateCompleteNoRefinance(
     transactionFeePercent,
     realtorFeePercent,
     targetMonth,
+    exitMonth,
     years,
-    principal,
-    annualInterest,
-    monthlyPayment,
   );
 
   if (!exitValuation) {

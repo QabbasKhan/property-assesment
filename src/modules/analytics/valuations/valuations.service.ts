@@ -17,6 +17,7 @@ import {
 } from 'src/common/utils/fr-mortgage-filter.util';
 import {
   calculateCompleteNoRefinance,
+  calculateCompleteWithRefinance,
   // calculateCompleteNoRefinance,
   calculateDownPayment,
   calculateInvestment,
@@ -29,6 +30,7 @@ import {
 import { CreateValuationDto } from './dto/create-valuation.dto';
 import { UpdateValuationDto } from './dto/update-valuation.dto';
 import { AnalyticsService } from '../analytics.service';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class ValuationsService {
@@ -504,6 +506,21 @@ export class ValuationsService {
       5,
       37,
     );
+
+    const complete_refinanceYear5m37 = calculateCompleteWithRefinance(
+      refinanceYear5m37,
+      calc_investment.toNumber(),
+      mortgageData,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      60,
+      60,
+      5,
+    );
+
     const refinanceYear7m37 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -516,6 +533,21 @@ export class ValuationsService {
       7,
       37,
     );
+
+    const complete_refinanceYear7m37 = calculateCompleteWithRefinance(
+      refinanceYear7m37,
+      calc_investment.toNumber(),
+      mortgageData,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      37,
+      84,
+      7,
+    );
+
     const refinanceYear7m49 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -528,6 +560,20 @@ export class ValuationsService {
       7,
       49,
     );
+    const complete_refinanceYear7m49 = calculateCompleteWithRefinance(
+      refinanceYear7m49,
+      calc_investment.toNumber(),
+      mortgageData,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      48,
+      80,
+      7,
+    );
+
     const refinanceYear10m37 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -540,6 +586,20 @@ export class ValuationsService {
       10,
       37,
     );
+    const complete_refinanceYear10m37 = calculateCompleteWithRefinance(
+      refinanceYear10m37,
+      calc_investment.toNumber(),
+      mortgageData,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      37,
+      120,
+      10,
+    );
+
     const refinanceYear10m49 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -552,6 +612,19 @@ export class ValuationsService {
       10,
       49,
     );
+    const complete_refinanceYear10m49 = calculateCompleteWithRefinance(
+      refinanceYear10m49,
+      calc_investment.toNumber(),
+      mortgageData,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      48,
+      120,
+      10,
+    );
     const refinanceYear10m61 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -563,6 +636,19 @@ export class ValuationsService {
       mortgageData[2].capitalLift,
       10,
       61,
+    );
+    const complete_refinanceYear10m61 = calculateCompleteWithRefinance(
+      refinanceYear10m61,
+      calc_investment.toNumber(),
+      mortgageData,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      60,
+      120,
+      10,
     );
 
     const exitValuation = [];
@@ -685,12 +771,18 @@ export class ValuationsService {
       noRefinanceYear5: result5yr,
       noRefinanceYear7: result7yr,
       noRefinanceYear10: result10yr,
-      refinanceYear5_37month: refinanceYear5m37,
-      refinanceYear7_37month: refinanceYear7m37,
-      refinanceYear7_49month: refinanceYear7m49,
-      refinanceYear10_37month: refinanceYear10m37,
-      refinanceYear10_month49: refinanceYear10m49,
-      refinanceYear10_month61: refinanceYear10m61,
+      refinanceYear5_37month: complete_refinanceYear5m37,
+      refinanceYear7_37month: complete_refinanceYear7m37,
+      refinanceYear7_49month: complete_refinanceYear7m49,
+      refinanceYear10_37month: complete_refinanceYear10m37,
+      refinanceYear10_month49: complete_refinanceYear10m49,
+      refinanceYear10_month61: complete_refinanceYear10m61,
+      // refinanceYear5_37month: refinanceYear5m37,
+      // refinanceYear7_37month: refinanceYear7m37,
+      // refinanceYear7_49month: refinanceYear7m49,
+      // refinanceYear10_37month: refinanceYear10m37,
+      // refinanceYear10_month49: refinanceYear10m49,
+      // refinanceYear10_month61: refinanceYear10m61,
       exitValuation,
       noiData: calc_noiProjections,
     };
@@ -760,20 +852,4 @@ export class ValuationsService {
       refinanced: refinancedPayments || [],
     };
   }
-
-  // findAll() {
-  //   return `This action returns all valuations`;
-  // }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} valuation`;
-  // }
-
-  // update(id: number, updateValuationDto: UpdateValuationDto) {
-  //   return `This action updates a #${id} valuation`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} valuation`;
-  // }
 }
