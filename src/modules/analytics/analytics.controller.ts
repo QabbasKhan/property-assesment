@@ -37,6 +37,12 @@ export class AnalyticsController {
     return { data };
   }
 
+  @Get('report/:id')
+  async generateReportData(@Param('id') id: string) {
+    const data = await this.analyticsService.generateReportData(id);
+    return { data };
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.analyticsService.findOne(id);

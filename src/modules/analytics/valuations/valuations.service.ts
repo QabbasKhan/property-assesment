@@ -506,7 +506,6 @@ export class ValuationsService {
       5,
       37,
     );
-
     const complete_refinanceYear5m37 = calculateCompleteWithRefinance(
       refinanceYear5m37,
       calc_investment.toNumber(),
@@ -533,7 +532,6 @@ export class ValuationsService {
       7,
       37,
     );
-
     const complete_refinanceYear7m37 = calculateCompleteWithRefinance(
       refinanceYear7m37,
       calc_investment.toNumber(),
@@ -625,6 +623,7 @@ export class ValuationsService {
       120,
       10,
     );
+
     const refinanceYear10m61 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -783,8 +782,8 @@ export class ValuationsService {
       // refinanceYear10_37month: refinanceYear10m37,
       // refinanceYear10_month49: refinanceYear10m49,
       // refinanceYear10_month61: refinanceYear10m61,
-      exitValuation,
-      noiData: calc_noiProjections,
+      // exitValuation,
+      // noiData: calc_noiProjections,
     };
   }
 

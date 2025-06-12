@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, HydratedDocument } from 'mongoose';
 import { DROP_DOWN } from '../enums/input-fields.enum';
 
 @Schema({ timestamps: true })
-export class Analytics extends Document {
+export class Analytics {
   @Prop()
   saveAs: string;
 
@@ -138,3 +138,4 @@ export class Analytics extends Document {
 }
 
 export const AnalyticsSchema = SchemaFactory.createForClass(Analytics);
+export type IAnalytics = HydratedDocument<Analytics>;
