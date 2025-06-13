@@ -782,8 +782,8 @@ export class ValuationsService {
       // refinanceYear10_37month: refinanceYear10m37,
       // refinanceYear10_month49: refinanceYear10m49,
       // refinanceYear10_month61: refinanceYear10m61,
-      // exitValuation,
-      // noiData: calc_noiProjections,
+      exitValuation,
+      noiData: calc_noiProjections,
     };
   }
 

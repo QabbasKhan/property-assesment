@@ -12,6 +12,7 @@ import {
   calculateInvestment,
   calculateNoRefinance,
   calculatePurchasePrice,
+  calculateSingleExitValuation,
   calculateWithRefinance,
   NoiProjectionCalculator,
 } from 'src/common/utils/fr-valuation-filter.util';
@@ -27,7 +28,10 @@ import {
 } from 'src/common/utils/fr-mortgage-filter.util';
 import Decimal from 'decimal.js';
 import { CreateValuationDto } from './valuations/dto/create-valuation.dto';
-import { evaluateInvestmentPerformance } from 'src/common/utils/fr-report-filter.util';
+import {
+  evaluateInvestmentPerformance,
+  evaluateSyndicatorsDealData,
+} from 'src/common/utils/fr-report-filter.util';
 
 @Injectable()
 export class AnalyticsService {
@@ -143,7 +147,91 @@ export class AnalyticsService {
       mortgageData,
     );
 
-    //----------------------------Valuations No Hold ------------------------------//
+    //----------------------------Valuations No Hold------------------------------//
+    const noRefinanceYear5 = calculateNoRefinance(
+      calc_noiProjections,
+      dto.property_manager_fee,
+      calc_investment.toNumber(),
+      dto.syndi_aum_ann_fee,
+      calc_originalPayments,
+      dto.dynamic_drop_down_one,
+      dto.dynamic_drop_down_two,
+      5,
+    );
+    const noRefinanceYear7 = calculateNoRefinance(
+      calc_noiProjections,
+      dto.property_manager_fee,
+      calc_investment.toNumber(),
+      dto.syndi_aum_ann_fee,
+      calc_originalPayments,
+      dto.dynamic_drop_down_one,
+      dto.dynamic_drop_down_two,
+      7,
+    );
+    const noRefinanceYear10 = calculateNoRefinance(
+      calc_noiProjections,
+      dto.property_manager_fee,
+      calc_investment.toNumber(),
+      dto.syndi_aum_ann_fee,
+      calc_originalPayments,
+      dto.dynamic_drop_down_one,
+      dto.dynamic_drop_down_two,
+      10,
+    );
+
+    const exitValuation = [];
+    const year5 = calculateSingleExitValuation(
+      mortgageData,
+      noRefinanceYear5,
+      calc_investment.toNumber(),
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      60,
+      5,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
+    );
+    if (year5) exitValuation.push(year5);
+
+    const year7 = calculateSingleExitValuation(
+      mortgageData,
+      noRefinanceYear7,
+      calc_investment.toNumber(),
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      84,
+      7,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
+    );
+    if (year7) exitValuation.push(year7);
+
+    const year10 = calculateSingleExitValuation(
+      mortgageData,
+      noRefinanceYear10,
+      calc_investment.toNumber(),
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
+      dto.syndi_sale_price_fee,
+      dto.transaction_and_bank_fee,
+      dto.realtor_fee,
+      120,
+      10,
+      calc_principal,
+      dto.loan_annual_intr,
+      calc_monthlyPmt,
+    );
+
+    if (year10) exitValuation.push(year10);
+    //----------------------------Valuations No Hold Completed------------------------------//
     const result5yr = calculateCompleteNoRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
@@ -376,6 +464,18 @@ export class AnalyticsService {
 
     const investmentInsights = evaluateInvestmentPerformance(valuationData);
 
+    //----------------------------Performance------------------------------//
+    const syndicatorsDealData = evaluateSyndicatorsDealData(
+      dto.syndi_origination_fee,
+      dto.syndi_sale_price_fee,
+      calc_investment,
+      result5yr,
+      result7yr,
+      result10yr,
+      mortgageData,
+      exitValuation,
+    );
+
     return {
       property: dto.name,
       location: dto.location,
@@ -390,6 +490,7 @@ export class AnalyticsService {
       lpWaterFallShare: dto.waterfall_share,
       investorFunding: calc_investment.toNumber().toFixed(2),
       investmentInsights,
+      syndicatorsDealData,
     };
   }
 
