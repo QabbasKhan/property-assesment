@@ -510,12 +510,22 @@ export function calculateSingleExitValuationWithRefinance(
 
   const sellingCosts = salePrice.mul(totalFeePercent);
 
-  const mortgage = calculateRemainingMortgageBalance(
+  // const mortgage = calculateRemainingMortgageBalance(
+  //   mortgageEntry.mortgage,
+  //   mortgageEntry.refinancePMT,
+  //   targetMonth,
+  //   exitMonth,
+  // );
+
+  const mortgage = calculateRemainingMortgageBalanceWithRefinance(
     mortgageEntry.mortgage,
     mortgageEntry.refinancePMT,
+    realtorFeePercent,
     targetMonth,
     exitMonth,
   );
+
+  console.log(mortgage);
 
   const netProceeds = salePrice.minus(sellingCosts).minus(mortgage);
 
@@ -540,6 +550,17 @@ export function calculateSingleExitValuationWithRefinance(
 
   // 6. Calculate GP share
   const gpShare = excessCapitalGains.minus(lpPayment);
+
+  console.log(
+    targetYear,
+    salePrice,
+    sellingCosts,
+    netProceeds,
+    totalDueInvestor,
+    excessCapitalGains,
+    lpPayment,
+    gpShare,
+  );
 
   return {
     year: targetYear,
@@ -715,6 +736,10 @@ export function calculateCompleteWithRefinance(
     exitMonth,
     years,
   );
+
+  if (years == 5) {
+    console.log(exitValuation);
+  }
 
   if (!exitValuation) {
     throw new Error(`No mortgage data found for ${years} year exit`);
