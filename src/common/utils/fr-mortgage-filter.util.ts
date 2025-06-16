@@ -379,18 +379,25 @@ export function generateRefinanceCalculations(
   const rate84 = new Decimal(year7CapRate);
   const rate120 = new Decimal(year10CapRate);
 
-  const step1 = rate60.minus(rate0).div(60);
+  const step1 = rate60.minus(rate0).div(60); // Convert to decimal
   const step2 = rate84.minus(rate60).div(24);
   const step3 = rate120.minus(rate84).div(36);
 
-  // console.log('rate:', rate0, rate60, rate84);
+  const keyFor60 = rate60.minus(rate0).div(60);
+  const keyFor84 = rate84.minus(rate60).div(24);
+  const keyFor120 = rate120.minus(rate84).div(36);
 
-  // console.log('step1:', step1, step2, step3);
+  console.log('rate:', rate0, rate60, rate84);
+
+  console.log('step1:', step1, step2, step3);
 
   const targetMonths = [37, 48, 60, 84, 120];
 
+  let lastCapRate = new Decimal(0);
   for (const month of targetMonths) {
     let capRate: Decimal;
+
+    //1st approach long before
     // if (month <= 60) {
     //   capRate = rate0.plus(step1.mul(month - 1));
     //   // console.log(capRate);
@@ -400,17 +407,34 @@ export function generateRefinanceCalculations(
     //   capRate = rate84.plus(step3.mul(month - 84));
     // }
 
-    if (month < 60) {
-      capRate = rate0.plus(rate60).div(2);
-      // console.log(capRate);
-    } else if (month >= 60 && month < 84) {
-      capRate = rate60.plus(rate84).div(2);
+    //2nd approach before 6/16/25
+    // if (month < 60) {
+    //   capRate = rate0.plus(rate60).div(2);
+    //   // console.log(capRate);
+    // } else if (month >= 60 && month < 84) {
+    //   capRate = rate60.plus(rate84).div(2);
+    // } else {
+    //   capRate = rate84.plus(rate120).div(2);
+    // }
+
+    if (month <= 60) {
+      capRate = rate0.plus(step1.mul(month));
+      lastCapRate = capRate;
+    } else if (month <= 84) {
+      const monthDiff = month - 60;
+      capRate = lastCapRate.plus(rate60).mul(step2.mul(monthDiff));
+
+      // capRate = rate60.plus(step2.mul(month - 60));
     } else {
-      capRate = rate84.plus(rate120).div(2);
+      const monthDiff = month - 84;
+      capRate = lastCapRate.plus(rate60).mul(step3.mul(monthDiff));
+
+      // capRate = rate84.plus(step3.mul(month - 84));
     }
 
     let value: Decimal;
-    const capRatePercent = capRate.div(100).toDecimalPlaces(4);
+    const capRatePercent = capRate.div(100);
+    // const capRatePercent = capRate;
     // console.log(purchaseCapRate, capRate, capRatePercent);
 
     let NOI;
@@ -456,6 +480,8 @@ export function generateRefinanceCalculations(
 
     const monthlyRateD = new Decimal(monthlyRate);
     const totalPaymentsD = new Decimal(totalPayments);
+
+    console.log(monthlyRateD, totalPaymentsD);
 
     //For Refinance PMT
     const one = new Decimal(1);

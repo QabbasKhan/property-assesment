@@ -5,7 +5,7 @@ export function evaluateInvestmentPerformance(input) {
   const scenarios = input;
   const parsed = [];
 
-  console.log('1');
+  // console.log('1');
 
   for (const key in scenarios) {
     const value = scenarios[key];
@@ -29,7 +29,7 @@ export function evaluateInvestmentPerformance(input) {
     }
   }
 
-  console.log('2');
+  // console.log('2');
 
   // Filter only valid IRR values
   const validIrrs = parsed.filter(
@@ -44,29 +44,29 @@ export function evaluateInvestmentPerformance(input) {
     worstIrr = validIrrs.reduce((a, b) => (a.irr < b.irr ? a : b));
   }
 
-  console.log('3');
+  // console.log('3');
 
-  console.log(parsed);
+  // console.log(parsed);
 
   const bestCash = parsed.reduce((a, b) =>
     a.averageCashOnCash > b.averageCashOnCash ? a : b,
   );
-  console.log('4');
+  // console.log('4');
 
   const worstCash = parsed.reduce((a, b) =>
     a.averageCashOnCash < b.averageCashOnCash ? a : b,
   );
-  console.log('5');
+  // console.log('5');
 
   const bestAnnual = parsed.reduce((a, b) =>
     a.annualizedReturn > b.annualizedReturn ? a : b,
   );
-  console.log('6');
+  // console.log('6');
 
   const worstAnnual = parsed.reduce((a, b) =>
     a.annualizedReturn < b.annualizedReturn ? a : b,
   );
-  console.log('7');
+  // console.log('7');
 
   return {
     bestIrr: bestIrr ? { key: bestIrr.key, value: bestIrr.irr } : null,
@@ -136,15 +136,15 @@ export function evaluateSyndicatorsDealData(
         .toDecimalPlaces(2)
         .toNumber(),
       syndicationExit: syndicationExit.toDecimalPlaces(2).toNumber(),
-      syndicatorAumFee: totalAumFee.toDecimalPlaces(2).toNumber(),
-      gainShare: gainShare.toDecimalPlaces(2).toNumber(),
+      syndicatorAumFee: totalAumFee.toFixed(2),
+      gainShare: gainShare.toFixed(2),
       totalValue: totalValue.toDecimalPlaces(2).toNumber(),
       annualizedTotalValue: annualizedValue.toDecimalPlaces(2).toNumber(),
     });
 
     propertyManagerValues.push({
       year,
-      propertyManagerFee: totalPropertyManagerFee.toDecimalPlaces(2).toNumber(),
+      propertyManagerFee: totalPropertyManagerFee,
     });
   }
 
