@@ -224,24 +224,34 @@ export class AnnualPaymentCalculator {
 
     //-----------------------------------------new-----------------------------------------//
 
+    console.log(interestOnlyMonths, firstPaymentMonth);
+
     // Interest-only months per year
-    const year1IOMonths =
+    // Year 1 calculation:
+    const year1IOcappedMonths =
       interestOnlyMonths > 0
-        ? Math.max(0, Math.min(12, interestOnlyMonths) - firstPaymentMonth + 1)
+        ? Math.min(Math.max(interestOnlyMonths, 1), 12)
+        : 0;
+    const year1IOMonths = year1IOcappedMonths - firstPaymentMonth + 1;
+
+    // Year 2 calculation:
+    let year2IOMonths = 0;
+    if (interestOnlyMonths > 12) {
+      if (interestOnlyMonths < 25) {
+        year2IOMonths = Math.min(interestOnlyMonths - year1IOMonths, 12);
+      } else if (interestOnlyMonths < 36) {
+        year2IOMonths = 12;
+      }
+      // Else remains 0
+    }
+
+    // Year 3 calculation:
+    const year3IOMonths =
+      interestOnlyMonths > 24
+        ? Math.min(interestOnlyMonths - 24, 12) // Cap at 12 months for year 3
         : 0;
 
-    const year2IOMonths =
-      interestOnlyMonths > 12
-        ? interestOnlyMonths < 25
-          ? interestOnlyMonths - 12
-          : interestOnlyMonths < 36
-            ? 12
-            : 0
-        : 0;
-
-    const year3IOMonths = interestOnlyMonths > 24 ? interestOnlyMonths - 24 : 0;
-
-    // console.log(year1IOMonths, year2IOMonths, year3IOMonths);
+    console.log(year1IOMonths, year2IOMonths, year3IOMonths);
 
     for (let year = 1; year <= analysisYears; year++) {
       let ioMonths = 0;
