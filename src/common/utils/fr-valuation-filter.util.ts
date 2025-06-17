@@ -2,6 +2,7 @@ import Decimal from 'decimal.js';
 import { irr } from 'financial'; // Using financial library for IRR calculation
 import { DROP_DOWN } from 'src/modules/analytics/enums/input-fields.enum';
 import { calculateRemainingMortgageBalance } from './fr-mortgage-filter.util';
+import { exit } from 'process';
 
 export function calculatePurchasePrice(
   asking_price: number,
@@ -215,7 +216,7 @@ export function calculateSingleExitValuation(
     principal,
     annualInterest,
     monthlyPayment,
-    targetMonth,
+    targetMonth - 1,
   );
 
   const netProceeds = salePrice.minus(sellingCosts).minus(mortgage);
@@ -418,11 +419,13 @@ export function calculateCompleteNoRefinance(
   }));
 
   // 6. Calculate average cash-on-cash
-  const averageCashOnCash = new Decimal(
-    cashFlowsWithCoc.reduce((sum, flow) => sum + flow.cashOnCashReturn, 0) /
-      years,
-  )
-    .toDecimalPlaces(0)
+  const averageCashOnCash = cashFlowsWithCoc
+    .reduce(
+      (sum, flow) => sum.plus(new Decimal(flow.cashOnCashReturn)),
+      new Decimal(0),
+    )
+    .div(years)
+    .toDecimalPlaces(2)
     .toNumber();
 
   // 7. Calculate total and annualized return
@@ -517,6 +520,7 @@ export function calculateSingleExitValuationWithRefinance(
   //   exitMonth,
   // );
 
+  //WORKING HERE 6/17/25
   const mortgage = calculateRemainingMortgageBalanceWithRefinance(
     mortgageEntry.mortgage,
     mortgageEntry.refinancePMT,
@@ -525,7 +529,7 @@ export function calculateSingleExitValuationWithRefinance(
     exitMonth,
   );
 
-  // console.log(mortgage);
+  console.log('dat:', mortgage, exitMonth, targetMonth, targetYear);
 
   const netProceeds = salePrice.minus(sellingCosts).minus(mortgage);
 
@@ -682,14 +686,14 @@ export function calculateRemainingMortgageBalanceWithRefinance(
   const i = new Decimal(annualIncrease);
   const pmt = new Decimal(monthlyPayment);
 
-  if (t.lt(r)) return 0;
-  if (t.eq(r)) return P.toNumber();
+  if (r.lt(t)) return 0;
+  if (r.eq(t)) return P.toNumber();
 
   // Calculate monthly rate
   const monthlyRate = i.plus(1).pow(new Decimal(1)).minus(1);
 
   // Calculate each month sequentially
-  for (let m = r.plus(1); m.lte(t); m = m.plus(1)) {
+  for (let m = t.plus(1); m.lte(r); m = m.plus(1)) {
     P = P.times(monthlyRate.plus(1)).minus(pmt);
   }
 
@@ -732,8 +736,8 @@ export function calculateCompleteWithRefinance(
     syndiFeePercent,
     transactionFeePercent,
     realtorFeePercent,
-    targetMonth,
     exitMonth,
+    targetMonth,
     years,
   );
 
@@ -741,10 +745,26 @@ export function calculateCompleteWithRefinance(
     throw new Error(`No mortgage data found for ${years} year exit`);
   }
 
+  const is5YearExit = years === 5 && targetMonth === 37;
+  const is7YearExit = years === 7 && targetMonth === 48;
+  const is10YearExit = years === 10 && targetMonth === 60;
+
   // 3. Calculate cash flow from closing (Total Due Investor)
-  const cashFlowFromClosing = new Decimal(exitValuation.lpPayment)
-    .toDecimalPlaces(0)
-    .toNumber();
+  let cashFlowFromClosing;
+
+  if (is5YearExit || is7YearExit || is10YearExit) {
+    cashFlowFromClosing = new Decimal(exitValuation.gpShare)
+      .toDecimalPlaces(0)
+      .toNumber();
+  } else {
+    cashFlowFromClosing = new Decimal(exitValuation.lpPayment)
+      .toDecimalPlaces(0)
+      .toNumber();
+  }
+
+  if (targetMonth === 37 && exitMonth === 84 && years === 7) {
+    console.log(exitValuation, cashFlowFromClosing);
+  }
 
   // 4. Calculate cash flow total (sum of annual + closing + investment)
   const totalAnnualCashFlow = annualCashFlows.reduce(

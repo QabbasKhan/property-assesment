@@ -251,8 +251,6 @@ export class AnnualPaymentCalculator {
         ? Math.min(interestOnlyMonths - 24, 12) // Cap at 12 months for year 3
         : 0;
 
-    console.log(year1IOMonths, year2IOMonths, year3IOMonths);
-
     for (let year = 1; year <= analysisYears; year++) {
       let ioMonths = 0;
       let piMonth = new Decimal(12);
@@ -401,7 +399,7 @@ export function generateRefinanceCalculations(
 
   // console.log('rate:', rate0, rate60, rate84);
 
-  console.log('step1:', step1, step2, step3);
+  // console.log('step1:', step1, step2, step3);
 
   const targetMonths = [37, 48, 60, 84, 120];
 

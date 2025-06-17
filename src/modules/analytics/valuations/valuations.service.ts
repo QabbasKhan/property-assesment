@@ -569,7 +569,7 @@ export class ValuationsService {
       dto.transaction_and_bank_fee,
       dto.realtor_fee,
       48,
-      80,
+      84,
       7,
     );
 
