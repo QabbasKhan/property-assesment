@@ -742,7 +742,7 @@ export function calculateCompleteWithRefinance(
   );
 
   if (!exitValuation) {
-    throw new Error(`No mortgage data found for ${years} year exit`);
+    throw new BadRequestException(`Error While Calculating Valuation for ${years} year exit. Try with different values and report the bug. Thank You!`);
   }
 
   const is5YearExit = years === 5 && targetMonth === 37;
