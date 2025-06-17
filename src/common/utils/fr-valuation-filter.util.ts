@@ -3,6 +3,7 @@ import { irr } from 'financial'; // Using financial library for IRR calculation
 import { DROP_DOWN } from 'src/modules/analytics/enums/input-fields.enum';
 import { calculateRemainingMortgageBalance } from './fr-mortgage-filter.util';
 import { exit } from 'process';
+import { BadRequestException } from '@nestjs/common';
 
 export function calculatePurchasePrice(
   asking_price: number,
@@ -742,7 +743,9 @@ export function calculateCompleteWithRefinance(
   );
 
   if (!exitValuation) {
-    throw new BadRequestException(`Error While Calculating Valuation for ${years} year exit. Try with different values and report the bug. Thank You!`);
+    throw new BadRequestException(
+      `Error While Calculating Valuation for ${years} year exit. Try with different values and report the bug. Thank You!`,
+    );
   }
 
   const is5YearExit = years === 5 && targetMonth === 37;
