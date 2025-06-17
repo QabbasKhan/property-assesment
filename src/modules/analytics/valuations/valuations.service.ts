@@ -456,6 +456,7 @@ export class ValuationsService {
       calc_totalPayments,
       calc_principal,
       calc_monthlyPmt,
+      dto.refinance_37_rate,
     );
 
     const primaryRefinanceData = this.getPrimaryAndRefinanceData(

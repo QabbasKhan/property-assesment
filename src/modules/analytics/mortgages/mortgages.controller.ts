@@ -15,11 +15,11 @@ import { UpdateMortgageDto } from './dto/update-mortgage.dto';
 export class MortgagesController {
   constructor(private readonly mortgagesService: MortgagesService) {}
 
-  @Post('/test')
-  async create(@Body() createMortgageDto: CreateMortgageDto) {
-    const data = await this.mortgagesService.test(createMortgageDto);
-    return { data };
-  }
+  // @Post('/test')
+  // async create(@Body() createMortgageDto: CreateMortgageDto) {
+  //   const data = await this.mortgagesService.test(createMortgageDto);
+  //   return { data };
+  // }
 
   @Get('/:id')
   async findOne(@Param('id') id: string) {
