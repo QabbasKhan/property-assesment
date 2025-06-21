@@ -141,6 +141,7 @@ export class AnalyticsService {
       calc_principal,
       calc_monthlyPmt,
       dto.refinance_37_rate,
+      dto.number_months_intr_only,
     );
 
     const primaryRefinanceData = this.getPrimaryAndRefinanceData(

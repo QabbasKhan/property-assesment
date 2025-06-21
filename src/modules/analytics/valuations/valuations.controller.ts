@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param } from '@nestjs/common';
 import { ValuationsService } from './valuations.service';
 import { calculateRemainingMortgageBalance } from 'src/common/utils/fr-mortgage-filter.util';
+import { calculateRemainingMortgageBalanceWithRefinance } from 'src/common/utils/fr-valuation-filter.util';
 
 @Controller({ path: 'valuations', version: '1' })
 export class ValuationsController {
@@ -23,12 +24,12 @@ export class ValuationsController {
       refMonth: number;
     },
   ) {
-    return await calculateRemainingMortgageBalance(
+    return calculateRemainingMortgageBalanceWithRefinance(
       body.startValue,
       body.annualIncreasePercent,
       body.refinancePayment,
       body.targetMonth,
-      // body.refMonth,
+      body.refMonth,
     );
   }
 

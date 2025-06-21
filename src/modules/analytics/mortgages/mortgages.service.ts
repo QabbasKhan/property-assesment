@@ -438,6 +438,7 @@ export class MortgagesService {
       calc_principal,
       calc_monthlyPmt,
       dto.refinance_37_rate,
+      dto.number_months_intr_only,
     );
 
     //----------------------------Payment And Refinance--------------------------------//

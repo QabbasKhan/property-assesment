@@ -4,6 +4,7 @@ import { DROP_DOWN } from 'src/modules/analytics/enums/input-fields.enum';
 import { calculateRemainingMortgageBalance } from './fr-mortgage-filter.util';
 import { exit } from 'process';
 import { BadRequestException } from '@nestjs/common';
+import { log } from 'console';
 
 export function calculatePurchasePrice(
   asking_price: number,
@@ -530,7 +531,7 @@ export function calculateSingleExitValuationWithRefinance(
     exitMonth,
   );
 
-  console.log('dat:', mortgage, exitMonth, targetMonth, targetYear);
+  // console.log('dat:', mortgage, exitMonth, targetMonth, targetYear);
 
   const netProceeds = salePrice.minus(sellingCosts).minus(mortgage);
 
@@ -681,6 +682,14 @@ export function calculateRemainingMortgageBalanceWithRefinance(
   targetMonth: number, //mortgage row 13:24
   refMonth: number, //mortgage row 37:128
 ) {
+  console.log(
+    refMortgage,
+    monthlyPayment,
+    annualIncrease,
+    targetMonth,
+    refMonth,
+  );
+
   const r = new Decimal(targetMonth);
   const t = new Decimal(refMonth);
   let P = new Decimal(refMortgage);
@@ -726,7 +735,10 @@ export function calculateCompleteWithRefinance(
   // 1. Calculate annual cash flows
   const annualCashFlows = withRefinanceCalculations;
 
-  // 2. Calculate exit valuation
+  // / 2. Calculate exit valuation
+  if (targetMonth === 37 && exitMonth === 84 && years === 7) {
+    // console.log('/+/+/+/+');
+  }
   // const targetMonth = years * 12; // 60, 84, or 120
   const exitValuation = calculateSingleExitValuationWithRefinance(
     mortgageData,
@@ -748,6 +760,8 @@ export function calculateCompleteWithRefinance(
     );
   }
 
+  // console.log('Exit Valuation:', exitValuation);
+
   const is5YearExit = years === 5 && targetMonth === 37;
   const is7YearExit = years === 7 && targetMonth === 48;
   const is10YearExit = years === 10 && targetMonth === 60;
@@ -759,14 +773,12 @@ export function calculateCompleteWithRefinance(
     cashFlowFromClosing = new Decimal(exitValuation.gpShare)
       .toDecimalPlaces(0)
       .toNumber();
+
+    // console.log('++++exit++++', exitMonth, targetMonth, years);
   } else {
     cashFlowFromClosing = new Decimal(exitValuation.lpPayment)
       .toDecimalPlaces(0)
       .toNumber();
-  }
-
-  if (targetMonth === 37 && exitMonth === 84 && years === 7) {
-    console.log(exitValuation, cashFlowFromClosing);
   }
 
   // 4. Calculate cash flow total (sum of annual + closing + investment)

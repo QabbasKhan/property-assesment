@@ -23,7 +23,9 @@ import {
   calculateInvestment,
   calculateNoRefinance,
   calculatePurchasePrice,
+  calculateRemainingMortgageBalanceWithRefinance,
   calculateSingleExitValuation,
+  calculateSingleExitValuationWithRefinance,
   calculateWithRefinance,
   NoiProjectionCalculator,
 } from 'src/common/utils/fr-valuation-filter.util';
@@ -457,6 +459,7 @@ export class ValuationsService {
       calc_principal,
       calc_monthlyPmt,
       dto.refinance_37_rate,
+      dto.number_months_intr_only,
     );
 
     const primaryRefinanceData = this.getPrimaryAndRefinanceData(

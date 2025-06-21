@@ -378,6 +378,7 @@ export function generateRefinanceCalculations(
   principal: number,
   monthlyPayment: number,
   refinanceRate: number, // input k19
+  interestOnlyMonths: number, // input D16
 ) {
   const syndicatorFeeD = new Decimal(syndicatorFee).div(100);
   const transactionFeeD = new Decimal(transactionFee).div(100);
@@ -392,10 +393,6 @@ export function generateRefinanceCalculations(
   const step1 = rate60.minus(rate0).div(60); // Convert to decimal
   const step2 = rate84.minus(rate60).div(24);
   const step3 = rate120.minus(rate84).div(36);
-
-  const keyFor60 = rate60.minus(rate0).div(60);
-  const keyFor84 = rate84.minus(rate60).div(24);
-  const keyFor120 = rate120.minus(rate84).div(36);
 
   // console.log('rate:', rate0, rate60, rate84);
 
@@ -499,12 +496,41 @@ export function generateRefinanceCalculations(
     const denominator = base.pow(totalPaymentsD).minus(one);
     const refinancePMT = numerator.div(denominator).toDecimalPlaces(0);
 
+    //OLD BALANCE CALCULATION
+
+    // const onePlusR = monthlyRateD.plus(1);
+    // const onePlusRPowerT = onePlusR.pow(month - 2);
+    // const firstTerm = new Decimal(principal).mul(onePlusRPowerT);
+    // const secondTerm = new Decimal(monthlyPa
+    //   .mul(onePlusRPowerT.minus(1))
+    //   .div(monthlyRateD);
+
+    // const balanceAtRefinance = firstTerm.minus(secondTerm).toDecimalPlaces(0);
+
+    // if (month <= interestOnlyMonths) {
+    //   // Interest-only period logic
+    //   // Previous balance is same as principal + accrued interest + payments
+    //   let balance = new Decimal(principal);
+    //   for (let i = 2; i <= month; i++) {
+    //     const interest = balance.mul(monthlyRate);
+    //     balance = balance.plus(interest).plus(monthlyPayment);
+    //   }
+    //   return balance.toDecimalPlaces(0);
+    // }
+
+    //NEW BALANCE CALCULATION 6/21/25
+
+    const monthlyPaymentD = new Decimal(monthlyPayment);
+    // After interest-only period — amortized formula
+    const effectiveMonth = interestOnlyMonths === 0 ? month - 1 : month;
     const onePlusR = monthlyRateD.plus(1);
-    const onePlusRPowerT = onePlusR.pow(month - 2);
+    const onePlusRPowerT = onePlusR.pow(
+      effectiveMonth - interestOnlyMonths - 1,
+    );
     const firstTerm = new Decimal(principal).mul(onePlusRPowerT);
-    const secondTerm = new Decimal(monthlyPayment)
+    const secondTerm = monthlyPaymentD
       .mul(onePlusRPowerT.minus(1))
-      .div(monthlyRateD);
+      .div(monthlyRate);
 
     const balanceAtRefinance = firstTerm.minus(secondTerm).toDecimalPlaces(0);
 
@@ -514,8 +540,6 @@ export function generateRefinanceCalculations(
       .minus(balanceAtRefinance)
       .minus(feesAndCosts)
       .toDecimalPlaces(0);
-
-    // console.log(monthlyRateD, totalPaymentsD, mortgage, balanceAtRefinance);
 
     capRates.push({
       month,
