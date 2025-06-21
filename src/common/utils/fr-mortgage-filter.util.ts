@@ -114,24 +114,97 @@ export function calculateRemainingMortgageBalance(
   principal: number,
   annualRate: number,
   monthlyPayment: number,
-  monthsElapsed: number,
+  numberMonthInterestOnly: number,
+  month: number,
 ): number {
-  const P = new Decimal(principal);
-  const r = new Decimal(annualRate).div(100).div(12);
+  // const P = new Decimal(principal);
+  // const r = new Decimal(annualRate).div(100).div(12);
   const M = new Decimal(monthlyPayment);
-  const t = new Decimal(monthsElapsed);
+  // const t = new Decimal(monthsElapsed);
+  // // (1+r)^t
+  // const onePlusRPowT = r.plus(1).pow(t);
+  // // [((1+r)^t - 1)/r]
+  // const paymentFactor = onePlusRPowT.minus(1).div(r);
+  // // P*(1+r)^t - M*[((1+r)^t - 1)/r]
+  // return P.mul(onePlusRPowT)
+  //   .minus(M.mul(paymentFactor))
+  //   .toDecimalPlaces(2)
+  //   .toNumber();
+  //New
+  const monthlyRate = new Decimal(annualRate).div(100).div(12);
+  if (month === 1) {
+    return new Decimal(principal).toDecimalPlaces(0).toNumber();
+  }
 
-  // (1+r)^t
-  const onePlusRPowT = r.plus(1).pow(t);
+  if (numberMonthInterestOnly > 0 && month <= numberMonthInterestOnly) {
+    // Interest-only period logic
+    let balance = new Decimal(principal);
+    for (let i = 2; i <= month; i++) {
+      const interest = balance.mul(monthlyRate);
+      balance = balance.plus(interest).plus(monthlyPayment);
+    }
+    return balance.toDecimalPlaces(0).toNumber();
+  }
 
-  // [((1+r)^t - 1)/r]
-  const paymentFactor = onePlusRPowT.minus(1).div(r);
+  // Adjust month if interest-only period is 0 (fetch previous month)
+  const effectiveMonth = numberMonthInterestOnly === 0 ? month - 1 : month;
+  const onePlusR = monthlyRate.plus(1);
+  const onePlusRPowerT = onePlusR.pow(
+    effectiveMonth - numberMonthInterestOnly - 1,
+  );
+  const firstTerm = new Decimal(principal).mul(onePlusRPowerT);
+  const secondTerm = M.mul(onePlusRPowerT.minus(1)).div(monthlyRate);
 
-  // P*(1+r)^t - M*[((1+r)^t - 1)/r]
-  return P.mul(onePlusRPowT)
-    .minus(M.mul(paymentFactor))
-    .toDecimalPlaces(2)
-    .toNumber();
+  return firstTerm.minus(secondTerm).toDecimalPlaces(0).toNumber();
+}
+/**
+ * Calculate mortgage balance at a specific month
+ * Handles interest-only periods and amortization
+ *
+ * @param month - Month number (1-based)
+ * @param interestOnlyMonths - Number of months in interest-only period
+ * @param principal - Initial loan amount
+ * @param monthlyRate - Monthly interest rate as Decimal
+ * @param monthlyPayment - Monthly payment amount as Decimal
+ * @returns Remaining balance at the end of the specified month
+ */
+export function calculateBalanceAtMonth({
+  principal,
+  monthlyRate,
+  monthlyPayment,
+  month,
+  interestOnlyMonths,
+}: {
+  month: number;
+  interestOnlyMonths: number;
+  principal: number;
+  monthlyRate: Decimal;
+  monthlyPayment: Decimal;
+}): Decimal {
+  if (month === 1) {
+    return new Decimal(principal);
+  }
+
+  if (interestOnlyMonths > 0 && month <= interestOnlyMonths) {
+    // Interest-only period logic
+    let balance = new Decimal(principal);
+    for (let i = 2; i <= month; i++) {
+      const interest = balance.mul(monthlyRate);
+      balance = balance.plus(interest).plus(monthlyPayment);
+    }
+    return balance.toDecimalPlaces(0);
+  }
+
+  // Adjust month if interest-only period is 0 (fetch previous month)
+  const effectiveMonth = interestOnlyMonths === 0 ? month - 1 : month;
+  const onePlusR = monthlyRate.plus(1);
+  const onePlusRPowerT = onePlusR.pow(effectiveMonth - interestOnlyMonths - 1);
+  const firstTerm = new Decimal(principal).mul(onePlusRPowerT);
+  const secondTerm = monthlyPayment
+    .mul(onePlusRPowerT.minus(1))
+    .div(monthlyRate);
+
+  return firstTerm.minus(secondTerm).toDecimalPlaces(0);
 }
 
 //------------------helpers----------------------//

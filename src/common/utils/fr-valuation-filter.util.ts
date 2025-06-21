@@ -56,15 +56,27 @@ export class NoiProjectionCalculator {
     const baseOccupancy = new Decimal(occupancyRates[0]).div(100);
 
     for (let year = 2; year <= 10; year++) {
-      // Calculate Target NOI
-      const targetNoi = previousNoi.mul(annualIncreaseFactor);
+      let targetNoi;
+      let realizedNoi;
 
-      // Calculate Realized NOI with occupancy adjustment
-      const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
-      // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
-      // const realizedNoi = targetNoi.mul(occupancyAdjustment);
-      const step1 = targetNoi.div(baseOccupancy);
-      const realizedNoi = step1.mul(currentOccupancy);
+      if (year == 10) {
+        const powerOfTen = annualIncreaseFactor.pow(10);
+        targetNoi = new Decimal(baseNoi).mul(powerOfTen);
+
+        const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
+        // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
+        // const realizedNoi = targetNoi.mul(occupancyAdjustment);
+        const step1 = targetNoi.div(baseOccupancy);
+        realizedNoi = step1.mul(currentOccupancy);
+      } else {
+        targetNoi = previousNoi.mul(annualIncreaseFactor);
+        // Calculate Realized NOI with occupancy adjustment
+        const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
+        // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
+        // const realizedNoi = targetNoi.mul(occupancyAdjustment);
+        const step1 = targetNoi.div(baseOccupancy);
+        realizedNoi = step1.mul(currentOccupancy);
+      }
 
       projections.push({
         targetNoi: targetNoi.toDecimalPlaces(0).toNumber(),
@@ -199,6 +211,7 @@ export function calculateSingleExitValuation(
   principal: number,
   annualInterest: number,
   monthlyPayment: number,
+  numberMonthInterestOnly: number, // Not used in this function, but can be added if needed
 ) {
   // 1. Get sale price from mortgage data
   const mortgageEntry = mortgageData.find((d) => d.month === targetMonth);
@@ -218,8 +231,13 @@ export function calculateSingleExitValuation(
     principal,
     annualInterest,
     monthlyPayment,
-    targetMonth - 1,
+    numberMonthInterestOnly,
+    targetMonth + 1,
   );
+
+  if (targetYear == 5) {
+    console.log('mortgage: ', mortgage);
+  }
 
   const netProceeds = salePrice.minus(sellingCosts).minus(mortgage);
 
@@ -349,6 +367,7 @@ export function calculateCompleteNoRefinance(
   principal: number,
   annualInterest: number,
   monthlyPayment: number,
+  numberMonthInterestOnly: number = 0,
 ) {
   // 1. Calculate annual cash flows
   const annualCashFlows = calculateNoRefinance(
@@ -378,6 +397,7 @@ export function calculateCompleteNoRefinance(
     principal,
     annualInterest,
     monthlyPayment,
+    numberMonthInterestOnly,
   );
 
   if (!exitValuation) {

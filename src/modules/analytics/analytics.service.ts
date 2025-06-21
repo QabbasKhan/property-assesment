@@ -196,6 +196,7 @@ export class AnalyticsService {
       calc_principal,
       dto.loan_annual_intr,
       calc_monthlyPmt,
+      dto.number_months_intr_only,
     );
     if (year5) exitValuation.push(year5);
 
@@ -213,6 +214,7 @@ export class AnalyticsService {
       calc_principal,
       dto.loan_annual_intr,
       calc_monthlyPmt,
+      dto.number_months_intr_only,
     );
     if (year7) exitValuation.push(year7);
 
@@ -230,6 +232,7 @@ export class AnalyticsService {
       calc_principal,
       dto.loan_annual_intr,
       calc_monthlyPmt,
+      dto.number_months_intr_only,
     );
 
     if (year10) exitValuation.push(year10);
