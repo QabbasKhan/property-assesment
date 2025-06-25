@@ -27,6 +27,7 @@ import {
   calculateSingleExitValuation,
   calculateSingleExitValuationWithRefinance,
   calculateWithRefinance,
+  calculateWithRefinanceForYear10,
   NoiProjectionCalculator,
 } from 'src/common/utils/fr-valuation-filter.util';
 import { CreateValuationDto } from './dto/create-valuation.dto';
@@ -522,6 +523,7 @@ export class ValuationsService {
       60,
       60,
       5,
+      dto.refinance_61_rate,
     );
 
     const refinanceYear7m37 = calculateWithRefinance(
@@ -548,6 +550,7 @@ export class ValuationsService {
       37,
       84,
       7,
+      dto.refinance_37_rate,
     );
 
     const refinanceYear7m49 = calculateWithRefinance(
@@ -574,9 +577,10 @@ export class ValuationsService {
       48,
       84,
       7,
+      dto.refinance_49_rate,
     );
 
-    const refinanceYear10m37 = calculateWithRefinance(
+    const refinanceYear10m37 = calculateWithRefinanceForYear10(
       calc_noiProjections,
       dto.property_manager_fee,
       calc_investment.toNumber(),
@@ -587,7 +591,10 @@ export class ValuationsService {
       mortgageData[0].capitalLift,
       10,
       37,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
     );
+
     const complete_refinanceYear10m37 = calculateCompleteWithRefinance(
       refinanceYear10m37,
       calc_investment.toNumber(),
@@ -600,9 +607,10 @@ export class ValuationsService {
       37,
       120,
       10,
+      dto.refinance_37_rate,
     );
 
-    const refinanceYear10m49 = calculateWithRefinance(
+    const refinanceYear10m49 = calculateWithRefinanceForYear10(
       calc_noiProjections,
       dto.property_manager_fee,
       calc_investment.toNumber(),
@@ -613,6 +621,8 @@ export class ValuationsService {
       mortgageData[1].capitalLift,
       10,
       49,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
     );
     const complete_refinanceYear10m49 = calculateCompleteWithRefinance(
       refinanceYear10m49,
@@ -626,9 +636,10 @@ export class ValuationsService {
       48,
       120,
       10,
+      dto.refinance_37_rate,
     );
 
-    const refinanceYear10m61 = calculateWithRefinance(
+    const refinanceYear10m61 = calculateWithRefinanceForYear10(
       calc_noiProjections,
       dto.property_manager_fee,
       calc_investment.toNumber(),
@@ -639,6 +650,8 @@ export class ValuationsService {
       mortgageData[2].capitalLift,
       10,
       61,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
     );
     const complete_refinanceYear10m61 = calculateCompleteWithRefinance(
       refinanceYear10m61,
@@ -652,6 +665,7 @@ export class ValuationsService {
       60,
       120,
       10,
+      dto.refinance_61_rate,
     );
 
     const exitValuation = [];
@@ -728,6 +742,7 @@ export class ValuationsService {
       calc_principal,
       dto.loan_annual_intr,
       calc_monthlyPmt,
+      dto.number_months_intr_only,
     );
     const result7yr = calculateCompleteNoRefinance(
       calc_noiProjections,
@@ -747,6 +762,7 @@ export class ValuationsService {
       calc_principal,
       dto.loan_annual_intr,
       calc_monthlyPmt,
+      dto.number_months_intr_only,
     );
     const result10yr = calculateCompleteNoRefinance(
       calc_noiProjections,
@@ -766,6 +782,7 @@ export class ValuationsService {
       calc_principal,
       dto.loan_annual_intr,
       calc_monthlyPmt,
+      dto.number_months_intr_only,
     );
 
     return {

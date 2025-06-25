@@ -297,7 +297,7 @@ export class AnnualPaymentCalculator {
 
     //-----------------------------------------new-----------------------------------------//
 
-    console.log(interestOnlyMonths, firstPaymentMonth);
+    // console.log(interestOnlyMonths, firstPaymentMonth);
 
     // Interest-only months per year
     // Year 1 calculation:
