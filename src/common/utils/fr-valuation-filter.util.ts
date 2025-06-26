@@ -533,7 +533,7 @@ export function calculateSingleExitValuationWithRefinance(
 
   const salePrice = new Decimal(mortgageEntry2.value);
 
-  const realtorfee = new Decimal(realtorFeePercent).mul(100);
+  const realtorfee = new Decimal(realtorFeePercent);
   // 2. Calculate net proceeds
   const totalFeePercent = new Decimal(syndiFeePercent)
     .plus(transactionFeePercent)
@@ -682,6 +682,9 @@ export function calculateWithRefinance(
       .add(refinancePayout)
       .toDecimalPlaces(0);
 
+    if (refinancePayout > 0)
+      console.log('REFINANCE PAYOUT: ', refinancePayout, years, refinanceMonth);
+
     annualCashFlows.push({
       year: year + 1,
       noi: noiValue.toDecimalPlaces(0).toNumber(),
@@ -728,6 +731,7 @@ export function calculateWithRefinanceForYear10(
     refinanceStartYear = Math.floor(refinanceMonth / 12);
   }
 
+  let sumOfavailableDividends = new Decimal(0);
   for (let year = 0; year < years; year++) {
     let refinancePayout = 0;
     const currentYear = year + 1;
@@ -760,21 +764,23 @@ export function calculateWithRefinanceForYear10(
     availableDividends = availableDividends
       .minus(debtService)
       .toDecimalPlaces(0);
+    sumOfavailableDividends = sumOfavailableDividends.plus(availableDividends);
 
     // Initialize all special fields to 0 for year 1
     let prefDividendDue = new Decimal(0);
     let excessDividendPaid = new Decimal(0);
 
     if (currentYear > 1) {
-      cumulativeDividends = cumulativeDividends.plus(availableDividends);
+      cumulativeDividends = sumOfavailableDividends; //sum of prevs availableDividents
       prefDividendDue = new Decimal(investment)
         .mul(new Decimal(prefDividentRate).div(100))
         .mul(currentYear)
         .toDecimalPlaces(0);
       excessDividendPaid = cumulativeDividends.minus(prefDividendDue);
       investorBalanceDue = new Decimal(investment)
-        .plus(excessDividendPaid)
+        .minus(excessDividendPaid)
         .minus(refinancePayout);
+      // investorBalanceDue = new Decimal(investment + excessDividendPaid.toNumber() - refinancePayout)
     }
 
     // CASH FLOW CALCULATION
@@ -790,6 +796,9 @@ export function calculateWithRefinanceForYear10(
       cashFlow = availableDividends.plus(refinancePayout);
     }
     cashFlow = cashFlow.toDecimalPlaces(0);
+
+    // if (refinancePayout > 0)
+    //   console.log('REFINANCE PAYOUT: ', refinancePayout, years, refinanceMonth);
 
     annualCashFlows.push({
       year: currentYear,
@@ -1001,15 +1010,10 @@ export function calculateCompleteWithRefinance(
     );
   }
 
-  // if (targetMonth === 37 && exitMonth === 84 && years === 7) {
-  //   console.log(exitValuation);
-  // }
   // const logData = { exitValuation, targetMonth, exitMonth, years };
   // console.log(logData);
 
-  // console.log('Exit Valuation:', years, targetMonth, exitMonth, exitValuation);
-
-  const is5YearExit = years === 5 && targetMonth === 60;
+  const is5YearExit = years === 5 && targetMonth === 60; //conditions only apply to year 5
   // const is7YearExit = years === 7 && targetMonth === 48;
   // const is10YearExit = years === 10 && targetMonth === 60;
 
@@ -1104,27 +1108,9 @@ export function calculateCompleteWithRefinance(
     ];
   }
 
-  console.log(
-    'IRR Cash Flows:',
-    irrCashFlows,
-    years,
-    targetMonth,
-    exitMonth,
-    cashFlowFromClosing,
-    investment,
-  );
-
-  // const irrCashFlows = [
-  //   -investment, // Initial investment (negative)
-  //   ...annualCashFlows.map((flow) => flow.cashFlow),
-  //   cashFlowFromClosing + investment,
-  // ];
-
   const irrValue = new Decimal(irr(irrCashFlows, 0.1) * 100)
     .toDecimalPlaces(2)
     .toNumber();
-
-  console.log(irrValue, 'IRR Value');
 
   return {
     annualCashFlows: cashFlowsWithCoc,

@@ -665,7 +665,7 @@ export class ValuationsService {
       60,
       120,
       10,
-      dto.refinance_61_rate,
+      dto.refinance_37_rate,
     );
 
     const exitValuation = [];

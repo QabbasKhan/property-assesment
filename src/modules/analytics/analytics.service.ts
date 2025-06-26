@@ -301,7 +301,7 @@ export class AnalyticsService {
 
     //----------------------------Valuations With Refinance ------------------------------//
 
-    const refinanceYear5m37 = calculateWithRefinanceForYear10(
+    const refinanceYear5m37 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
       calc_investment.toNumber(),
@@ -312,8 +312,6 @@ export class AnalyticsService {
       mortgageData[0].capitalLift,
       5,
       37,
-      dto.refinance_37_rate,
-      dto.refinance_49_rate,
     );
     const complete_refinanceYear5m37 = calculateCompleteWithRefinance(
       refinanceYear5m37,
@@ -327,10 +325,10 @@ export class AnalyticsService {
       60,
       60,
       5,
-      dto.refinance_37_rate,
+      dto.refinance_61_rate,
     );
 
-    const refinanceYear7m37 = calculateWithRefinanceForYear10(
+    const refinanceYear7m37 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
       calc_investment.toNumber(),
@@ -341,8 +339,6 @@ export class AnalyticsService {
       mortgageData[0].capitalLift,
       7,
       37,
-      dto.preferred_ann_return_perc,
-      dto.refinance_37_rate,
     );
     const complete_refinanceYear7m37 = calculateCompleteWithRefinance(
       refinanceYear7m37,
@@ -359,7 +355,7 @@ export class AnalyticsService {
       dto.refinance_37_rate,
     );
 
-    const refinanceYear7m49 = calculateWithRefinanceForYear10(
+    const refinanceYear7m49 = calculateWithRefinance(
       calc_noiProjections,
       dto.property_manager_fee,
       calc_investment.toNumber(),
@@ -370,8 +366,6 @@ export class AnalyticsService {
       mortgageData[1].capitalLift,
       7,
       49,
-      dto.preferred_ann_return_perc,
-      dto.waterfall_share,
     );
     const complete_refinanceYear7m49 = calculateCompleteWithRefinance(
       refinanceYear7m49,
@@ -385,7 +379,7 @@ export class AnalyticsService {
       48,
       84,
       7,
-      dto.refinance_37_rate,
+      dto.refinance_49_rate,
     );
 
     const refinanceYear10m37 = calculateWithRefinanceForYear10(
@@ -457,7 +451,7 @@ export class AnalyticsService {
       mortgageData[2].capitalLift,
       10,
       61,
-      dto.refinance_61_rate,
+      dto.preferred_ann_return_perc,
       dto.waterfall_share,
     );
     const complete_refinanceYear10m61 = calculateCompleteWithRefinance(
@@ -472,7 +466,7 @@ export class AnalyticsService {
       60,
       120,
       10,
-      dto.refinance_61_rate,
+      dto.refinance_37_rate,
     );
 
     //----------------------------Performance------------------------------//
