@@ -21,7 +21,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT') || 8000;
 
-  app.enableCors({ origin: '*' });
+  app.enableCors();
 
   // Middleware to redirect base URL to /docs
   app.use((req: Request, res: Response, next: any) => {

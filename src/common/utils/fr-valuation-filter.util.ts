@@ -487,6 +487,8 @@ export function calculateCompleteNoRefinance(
     ];
   }
 
+  // console.log('IRR Cash Flows For NR:', irrCashFlows, years, targetMonth);
+
   // const irrCashFlows = [
   //   -investment, // Initial investment (negative)
   //   ...annualCashFlows.map((flow) => flow.cashFlow),
@@ -1012,7 +1014,7 @@ export function calculateCompleteWithRefinance(
   // const is10YearExit = years === 10 && targetMonth === 60;
 
   // 3. Calculate cash flow from closing (Total Due Investor)
-  let cashFlowFromClosing;
+  let cashFlowFromClosing: number;
 
   if (is5YearExit) {
     cashFlowFromClosing = new Decimal(exitValuation.gpShare)
@@ -1102,6 +1104,16 @@ export function calculateCompleteWithRefinance(
     ];
   }
 
+  console.log(
+    'IRR Cash Flows:',
+    irrCashFlows,
+    years,
+    targetMonth,
+    exitMonth,
+    cashFlowFromClosing,
+    investment,
+  );
+
   // const irrCashFlows = [
   //   -investment, // Initial investment (negative)
   //   ...annualCashFlows.map((flow) => flow.cashFlow),
@@ -1111,6 +1123,8 @@ export function calculateCompleteWithRefinance(
   const irrValue = new Decimal(irr(irrCashFlows, 0.1) * 100)
     .toDecimalPlaces(2)
     .toNumber();
+
+  console.log(irrValue, 'IRR Value');
 
   return {
     annualCashFlows: cashFlowsWithCoc,
