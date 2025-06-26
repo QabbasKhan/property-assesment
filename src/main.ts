@@ -21,7 +21,11 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT') || 8000;
 
-  app.enableCors();
+  // app.enableCors();
+  app.enableCors({
+    origin: ['https://cre-analytics.netlify.app'], // or use a regex, or function
+    credentials: true,
+  });
 
   // Middleware to redirect base URL to /docs
   app.use((req: Request, res: Response, next: any) => {
