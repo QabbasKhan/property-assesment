@@ -322,18 +322,6 @@ export function calculateNoRefinance(
     }
     cashFlow = cashFlow.minus(debtService).toDecimalPlaces(0);
 
-    // if (year == 0) {
-    //   console.log(
-    //     cashFlow,
-    //     noiValue,
-    //     propManagerFees,
-    //     aumFee,
-    //     debtService,
-    //     dynamicTwo,
-    //     dynamicOne,
-    //   );
-    // }
-
     annualCashFlows.push({
       year: year + 1,
       noi: noiValue.toDecimalPlaces(0).toNumber(),
@@ -369,17 +357,34 @@ export function calculateCompleteNoRefinance(
   monthlyPayment: number,
   numberMonthInterestOnly: number,
 ) {
-  // 1. Calculate annual cash flows
-  const annualCashFlows = calculateNoRefinance(
-    noiProjection,
-    propManagerFees,
-    investment,
-    syndiAumFee,
-    primaryData,
-    dynamicOne,
-    dynamicTwo,
-    years,
-  );
+  // 1. Calculate annual cash
+  let annualCashFlows;
+
+  if (years == 10) {
+    annualCashFlows = calculateNoRefinanceForYear10(
+      noiProjection,
+      propManagerFees,
+      investment,
+      syndiAumFee,
+      primaryData,
+      dynamicOne,
+      dynamicTwo,
+      years,
+      preferredReturnPerc,
+      waterfallSharePerc,
+    );
+  } else {
+    annualCashFlows = calculateNoRefinance(
+      noiProjection,
+      propManagerFees,
+      investment,
+      syndiAumFee,
+      primaryData,
+      dynamicOne,
+      dynamicTwo,
+      years,
+    );
+  }
 
   // 2. Calculate exit valuation
   const targetMonth = years * 12; // 60, 84, or 120
@@ -694,6 +699,96 @@ export function calculateWithRefinance(
       aumFee: aumFee.toDecimalPlaces(0).toNumber(),
       debtService: debtService.toDecimalPlaces(0).toNumber(), // Show as positive value
       cashFlow: cashFlow.toDecimalPlaces().toNumber(),
+    });
+  }
+
+  return annualCashFlows;
+}
+
+export function calculateNoRefinanceForYear10(
+  noiProjection: any[], // row17
+  propManagerFees: number, // Property manager fee percentage
+  investment: number, // c7
+  syndiAumFee: number, // D29
+  primaryData: any[], // for debt (not used in this calculation)
+  dynamicOne: string, // Determines if property management fees apply
+  dynamicTwo: string, // Determines if AUM fees apply
+  years: number, // Analysis period (5, 7, or 10 years)
+  prefDividentRate: number,
+  waterFallShareRate: number,
+) {
+  const annualCashFlows = [];
+  let sumOfavailableDividends = new Decimal(0);
+  let cumulativeDividends = new Decimal(0);
+  let investorBalanceDue = new Decimal(0);
+
+  for (let year = 0; year < years; year++) {
+    const currentYear = year + 1;
+    const noiValue = new Decimal(noiProjection[year]?.realizedNoi || 0);
+
+    const propertyManagementFee = noiValue
+      .div(0.2)
+      .mul(propManagerFees)
+      .div(100);
+
+    // 3. Calculate AUM Fee (
+    const aumFee = new Decimal(investment).mul(syndiAumFee).div(100);
+
+    // 4. Get Debt Service (from refinanceData)
+
+    const debtService = new Decimal(primaryData[year] || 0).toDecimalPlaces(0);
+
+    // 5. Calculate Cash Flow with conditional fee application
+    let availableDividends = noiValue;
+
+    if (dynamicTwo === DROP_DOWN.YES) {
+      // cashFlow = cashFlow.minus(propertyManagementFee);
+      availableDividends = availableDividends.minus(propertyManagementFee);
+    }
+    if (dynamicOne === DROP_DOWN.YES) {
+      // cashFlow = cashFlow.minus(aumFee);
+      availableDividends = availableDividends.minus(aumFee);
+    }
+    // cashFlow = cashFlow.minus(debtService).toDecimalPlaces(0);
+    availableDividends = availableDividends
+      .minus(debtService)
+      .toDecimalPlaces(0);
+    sumOfavailableDividends = sumOfavailableDividends.plus(availableDividends);
+
+    let prefDividendDue = new Decimal(0);
+    let excessDividendPaid = new Decimal(0);
+
+    if (currentYear > 1) {
+      cumulativeDividends = sumOfavailableDividends; //sum of prevs availableDividents
+      prefDividendDue = new Decimal(investment)
+        .mul(new Decimal(prefDividentRate).div(100))
+        .mul(currentYear)
+        .toDecimalPlaces(0);
+      excessDividendPaid = cumulativeDividends.minus(prefDividendDue);
+      investorBalanceDue = new Decimal(investment).minus(excessDividendPaid);
+      // investorBalanceDue = new Decimal(investment + excessDividendPaid.toNumber() - refinancePayout)
+    }
+
+    // CASH FLOW CALCULATION
+    let cashFlow = availableDividends;
+    if (currentYear > 1 && investorBalanceDue.lt(0)) {
+      cashFlow = availableDividends.mul(waterFallShareRate / 100);
+    }
+
+    annualCashFlows.push({
+      year: year + 1,
+      noi: noiValue.toDecimalPlaces(0).toNumber(),
+      propertyManagementFee: propertyManagementFee
+        .toDecimalPlaces(0)
+        .toNumber(),
+      debtService: debtService.toDecimalPlaces(0).toNumber(), // Show as positive value
+      aumFee: aumFee.toDecimalPlaces(2).toNumber(),
+      cashFlow: cashFlow.toNumber(),
+      availableToBeDividends: availableDividends.toNumber(),
+      cumulativeDividends: currentYear > 1 ? cumulativeDividends.toNumber() : 0,
+      preferredDividendDue: currentYear > 1 ? prefDividendDue.toNumber() : 0,
+      excessDividendPaid: currentYear > 1 ? excessDividendPaid.toNumber() : 0,
+      investorBalanceDue: currentYear > 1 ? investorBalanceDue.toNumber() : 0,
     });
   }
 

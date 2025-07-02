@@ -11,6 +11,7 @@ import {
   calculateDownPayment,
   calculateInvestment,
   calculateNoRefinance,
+  calculateNoRefinanceForYear10,
   calculatePurchasePrice,
   calculateSingleExitValuation,
   calculateWithRefinance,
@@ -171,7 +172,7 @@ export class AnalyticsService {
       dto.dynamic_drop_down_two,
       7,
     );
-    const noRefinanceYear10 = calculateNoRefinance(
+    const noRefinanceYear10 = calculateNoRefinanceForYear10(
       calc_noiProjections,
       dto.property_manager_fee,
       calc_investment.toNumber(),
@@ -180,6 +181,8 @@ export class AnalyticsService {
       dto.dynamic_drop_down_one,
       dto.dynamic_drop_down_two,
       10,
+      dto.preferred_ann_return_perc,
+      dto.waterfall_share,
     );
 
     const exitValuation = [];
