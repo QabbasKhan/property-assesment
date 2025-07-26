@@ -56,27 +56,34 @@ export class NoiProjectionCalculator {
     const baseOccupancy = new Decimal(occupancyRates[0]).div(100);
 
     for (let year = 2; year <= 10; year++) {
-      let targetNoi;
-      let realizedNoi;
+      // let targetNoi;
+      // let realizedNoi;
 
-      if (year == 10) {
-        const powerOfTen = annualIncreaseFactor.pow(10);
-        targetNoi = new Decimal(baseNoi).mul(powerOfTen);
+      // if (year == 10) {
+      //   const powerOfTen = annualIncreaseFactor.pow(10);
+      //   targetNoi = new Decimal(baseNoi).mul(powerOfTen);
 
+      //   const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
+      //   // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
+      //   // const realizedNoi = targetNoi.mul(occupancyAdjustment);
+      //   const step1 = targetNoi.div(baseOccupancy);
+      //   realizedNoi = step1.mul(currentOccupancy);
+      // } else {
+      //   targetNoi = previousNoi.mul(annualIncreaseFactor);
+      //   // Calculate Realized NOI with occupancy adjustment
+      //   const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
+      //   // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
+      //   // const realizedNoi = targetNoi.mul(occupancyAdjustment);
+      //   const step1 = targetNoi.div(baseOccupancy);
+      //   realizedNoi = step1.mul(currentOccupancy);
+      // }
+
+
+             const  targetNoi = previousNoi.mul(annualIncreaseFactor);
         const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
-        // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
-        // const realizedNoi = targetNoi.mul(occupancyAdjustment);
+
         const step1 = targetNoi.div(baseOccupancy);
-        realizedNoi = step1.mul(currentOccupancy);
-      } else {
-        targetNoi = previousNoi.mul(annualIncreaseFactor);
-        // Calculate Realized NOI with occupancy adjustment
-        const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
-        // const occupancyAdjustment = currentOccupancy.div(baseOccupancy);
-        // const realizedNoi = targetNoi.mul(occupancyAdjustment);
-        const step1 = targetNoi.div(baseOccupancy);
-        realizedNoi = step1.mul(currentOccupancy);
-      }
+        const realizedNoi = step1.mul(currentOccupancy);
 
       projections.push({
         targetNoi: targetNoi.toDecimalPlaces(0).toNumber(),
