@@ -78,12 +78,11 @@ export class NoiProjectionCalculator {
       //   realizedNoi = step1.mul(currentOccupancy);
       // }
 
+      const targetNoi = previousNoi.mul(annualIncreaseFactor);
+      const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
 
-             const  targetNoi = previousNoi.mul(annualIncreaseFactor);
-        const currentOccupancy = new Decimal(occupancyRates[year - 1]).div(100);
-
-        const step1 = targetNoi.div(baseOccupancy);
-        const realizedNoi = step1.mul(currentOccupancy);
+      const step1 = targetNoi.div(baseOccupancy);
+      const realizedNoi = step1.mul(currentOccupancy);
 
       projections.push({
         targetNoi: targetNoi.toDecimalPlaces(0).toNumber(),
