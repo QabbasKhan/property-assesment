@@ -19,7 +19,7 @@ export class CmsController {
 
   @ApiQuery({ type: String, name: 'pageName', required: true, enum: CMS_TYPE })
   @ApiBody({ type: Object })
-  @Auth(ROLE.SUPER_ADMIN)
+  @Auth(ROLE.ADMIN)
   @Patch('/page/:pageName')
   async updatePage(
     @Param('pageName') pageName: CMS_TYPE,

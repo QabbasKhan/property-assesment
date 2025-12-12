@@ -12,7 +12,7 @@ import { Paginate } from 'src/common/decorators/pagination.decorator';
 export class NewslettersController {
   constructor(private readonly newslettersService: NewslettersService) {}
 
-  @Auth(ROLE.SUPER_ADMIN)
+  @Auth(ROLE.ADMIN)
   @Get('/all')
   async findAll(@Paginate() query: Pagination) {
     const data = await this.newslettersService.findAll(query);
@@ -20,7 +20,7 @@ export class NewslettersController {
     return { data };
   }
 
-  @Auth(ROLE.SUPER_ADMIN)
+  @Auth(ROLE.ADMIN)
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.newslettersService.findOne(id);
@@ -35,7 +35,7 @@ export class NewslettersController {
     return { data };
   }
 
-  @Auth(ROLE.SUPER_ADMIN)
+  @Auth(ROLE.ADMIN)
   @Delete(':id')
   async deleteOne(@Param('id') id: string) {
     const data = await this.newslettersService.deleteOne(id);

@@ -47,6 +47,7 @@ export class AnalyticsService {
   ) {}
 
   async create(createAnalyticsDto: CreateAnalyticsDto) {
+    //createAnalyticsDto.user = userId;
     return await this.Analytic.create(createAnalyticsDto);
   }
 

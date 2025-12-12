@@ -71,17 +71,16 @@ export class CreateAnalyticsDto {
   @Type(() => Number)
   @IsNumber()
   first_month_principal_and_intr_payment: number;
-  
+
   @Type(() => Number)
   @IsOptional()
   @IsNumber()
   bank_fee_and_closing_cost: number;
-  
+
   @Type(() => Number)
   @IsOptional()
   @IsNumber()
   reserved_amount: number;
-
 
   @Type(() => Number)
   @IsNumber()

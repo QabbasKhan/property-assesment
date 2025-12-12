@@ -125,7 +125,7 @@ export class NotificationsService {
 
     if (from === 'admin') {
       const admin = await this.userService.findOneHelper(
-        { role: ROLE.SUPER_ADMIN },
+        { role: ROLE.ADMIN },
         { _id: 1 },
       );
       notification.from = admin._id;
@@ -134,7 +134,7 @@ export class NotificationsService {
     const toUser =
       to === 'admin'
         ? await this.userService.findOneHelper(
-            { role: ROLE.SUPER_ADMIN },
+            { role: ROLE.ADMIN },
             { _id: 1, socketIds: 1, fcmTokens: 1 },
           )
         : await this.userService.findOneHelper(

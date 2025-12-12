@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Delete,
-  Get,
-  Param
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Auth } from 'src/common/decorators/auth.decorator';
 import { GetUser } from 'src/common/decorators/get-user.decorator';
@@ -24,7 +19,7 @@ export class UsersController {
     return { data };
   }
 
-  @Auth(ROLE.COMPANY_ADMIN)
+  @Auth(ROLE.ADMIN)
   @Delete('delete-user/:id')
   async remove(@Param('id') id: string) {
     const data = await this.usersService.delete(id);

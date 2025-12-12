@@ -46,7 +46,7 @@ export class AuthService {
     const existingUser = await this.Users.findOne({ email });
     if (existingUser) throw new BadRequestException('User Already Exist');
 
-    signupDto.role = ROLE.PARENT;
+    signupDto.role = ROLE.USER;
     signupDto.status = STATUS.ACTIVE;
     signupDto.slug = generateSlug(name);
 
@@ -125,9 +125,6 @@ export class AuthService {
     //   return { message: 'Otp code has been send to your email' };
     // }
 
-    if ([ROLE.SUPER_ADMIN].includes(user.role))
-      throw new BadRequestException('You are not allowed to login here');
-
     const token = this.signToken(user.id);
 
     user.password = undefined;
@@ -169,7 +166,7 @@ export class AuthService {
     if (!user || !(await user.correctPassword(password, user.password)))
       throw new BadRequestException('Invalid login credentials');
 
-    if (![ROLE.SUPER_ADMIN].includes(user.role))
+    if (![ROLE.ADMIN].includes(user.role))
       throw new BadRequestException('Not a user route');
 
     return this.createSendToken(user);

@@ -63,7 +63,7 @@ export class UsersService {
    * @returns {Promise<IUser>} A promise that resolves to the user with the ADMIN role, or null if not found.
    */
   async getAdminHelper(): Promise<IUser> {
-    return await this.Users.findOne({ role: ROLE.SUPER_ADMIN });
+    return await this.Users.findOne({ role: ROLE.ADMIN });
   }
 
   /**

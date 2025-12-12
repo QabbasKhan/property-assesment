@@ -1,14 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument } from 'mongoose';
+import { Document, HydratedDocument, SchemaTypes } from 'mongoose';
 import { DROP_DOWN } from '../enums/input-fields.enum';
 
 @Schema({ timestamps: true })
 export class Analytics {
-  @Prop()
+  @Prop({ type: String, default: null })
   saveAs: string;
 
   @Prop({ required: true })
   name: string;
+
+  @Prop({ type: SchemaTypes.ObjectId, ref: 'User', default: null })
+  user: string;
 
   @Prop({ required: true })
   location: string;
