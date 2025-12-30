@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Pagination } from 'src/common/utils/types.util';
 import { CreateAnalyticsDto } from './dto/create-analytics.dto';
 import { UpdateAnalyticsDto } from './dto/update-analytics.dto';
@@ -34,6 +34,7 @@ import {
   evaluateInvestmentPerformance,
   evaluateSyndicatorsDealData,
 } from 'src/common/utils/fr-report-filter.util';
+import { IUser } from '../users/entities/user.entity';
 
 @Injectable()
 export class AnalyticsService {
@@ -44,11 +45,15 @@ export class AnalyticsService {
     // @Inject(forwardRef(() => ValuationsService))
     @InjectModel(Analytics.name)
     private readonly Analytic: Model<IAnalytics>,
-  ) {}
+  ) {
+    this.updateAll();
+  }
 
-  async create(createAnalyticsDto: CreateAnalyticsDto) {
-    //createAnalyticsDto.user = userId;
-    return await this.Analytic.create(createAnalyticsDto);
+  async create(user: IUser, createAnalyticsDto: CreateAnalyticsDto) {
+    return await this.Analytic.create({
+      ...createAnalyticsDto,
+      user: user._id,
+    });
   }
 
   async generateReportData(id: string) {
@@ -585,10 +590,12 @@ export class AnalyticsService {
   }
 
   async getAll(
+    user: IUser,
     pagination: Pagination,
     query: { search: string; status: string },
   ) {
     const dbQuery = {
+      user: user._id,
       ...(!!query.search && { name: { $regex: query.search, $options: 'i' } }),
       ...(!!query.status && query.status !== 'all' && { status: query.status }),
     };
@@ -623,5 +630,13 @@ export class AnalyticsService {
   async remove(id: string) {
     await this.Analytic.findByIdAndDelete(id);
     return { message: 'Deleted' };
+  }
+
+  async updateAll() {
+    await this.Analytic.updateMany(
+      {},
+      { $set: { user: new Types.ObjectId('680751097ac46d07d9338597') } },
+    );
+    return { message: 'Updated All' };
   }
 }
