@@ -65,7 +65,9 @@ export class CreateAnalyticsDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
-  @Max(36)
+  @Max(36, {
+    message: 'Number of months interest only must be between 0 and 36',
+  })
   number_months_intr_only: number;
 
   @Type(() => Number)
@@ -102,8 +104,8 @@ export class CreateAnalyticsDto {
 
   @Type(() => Number)
   @IsNumber()
-  @Min(1)
-  @Max(5)
+  @Min(1, { message: 'Syndicators AUM Annual Fee must be at least 1%' })
+  @Max(5, { message: 'Syndicators AUM Annual Fee must be at most 5%' })
   syndi_aum_ann_fee: number;
 
   @IsEnum(DROP_DOWN)

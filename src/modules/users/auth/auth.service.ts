@@ -52,26 +52,26 @@ export class AuthService {
 
     const user = await this.Users.create(signupDto);
 
-    const code = generateOtpCode();
-    await this.Otps.create({ email, code });
+    // const code = generateOtpCode();
+    // await this.Otps.create({ email, code });
 
-    try {
-      await this.emailService.sendSignupEmail(
-        {
-          email: user.email,
-          firstName: user.name,
-        },
-        {
-          code: code,
-        },
-      );
-    } catch (error) {
-      this.logger.logError(
-        error.message,
-        'Error while sending email on signup',
-        error.stack,
-      );
-    }
+    // try {
+    //   await this.emailService.sendSignupEmail(
+    //     {
+    //       email: user.email,
+    //       firstName: user.name,
+    //     },
+    //     {
+    //       code: code,
+    //     },
+    //   );
+    // } catch (error) {
+    //   this.logger.logError(
+    //     error.message,
+    //     'Error while sending email on signup',
+    //     error.stack,
+    //   );
+    // }
 
     const token = this.signToken(user.id);
 
