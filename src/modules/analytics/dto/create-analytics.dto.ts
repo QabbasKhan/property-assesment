@@ -80,8 +80,15 @@ export class CreateAnalyticsDto {
   bank_fee_and_closing_cost: number;
 
   @Type(() => Number)
-  @IsOptional()
-  @IsNumber()
+  @IsNotEmpty({
+    message: 'Please provide a valid number for Total Reserve Fund',
+  })
+  @IsNumber(
+    {},
+    {
+      message: 'Please provide a valid number for Total Reserve Fund',
+    },
+  )
   reserved_amount: number;
 
   @Type(() => Number)
@@ -160,7 +167,13 @@ export class CreateAnalyticsDto {
   occupancy10: number;
 
   @Type(() => Number)
-  @IsNumber()
+  @IsNotEmpty({ message: 'Purchase Capitalization Rate is required' })
+  @IsNumber(
+    {},
+    {
+      message: 'Please provide a valid number for Purchase Capitalization Rate',
+    },
+  )
   @Min(0)
   @Max(100)
   purchase_cap_rate: number;
