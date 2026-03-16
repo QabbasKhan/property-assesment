@@ -4,6 +4,7 @@ import { ErrorLogService } from './error-log.service';
 // import { S3Service } from './s3.service';
 import { SharedController } from './shared.controller';
 import { SharedService } from './shared.service';
+import { StripeService } from './stripe.service';
 
 @Global()
 @Module({
@@ -12,12 +13,14 @@ import { SharedService } from './shared.service';
     SharedService,
     EmailService,
     ErrorLogService,
+    StripeService,
     // S3Service,
   ],
   exports: [
     SharedService,
     EmailService,
     ErrorLogService,
+    StripeService,
     // S3Service,
   ],
 })

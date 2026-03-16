@@ -42,8 +42,4 @@ export interface EnvConfig {
   STRIPE_WEBHOOK_LINK?: string;
   STRIPE_WEBHOOK_SECRET?: string;
   STRIPE_CURRENCY?: string;
-
-  // UPS CREDENTIALS
-  UPS_CLIENT_ID?: string;
-  UPS_CLIENT_SECRET?: string;
 }

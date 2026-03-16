@@ -7,19 +7,28 @@ import { Otp, OtpSchema } from './entities/otp.entity';
 import { User, UserSchema } from './entities/user.entity';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
+import { SubscriptionPackagesController } from './subscription-packages/subscription-packages.controller';
+import { SubscriptionPackagesService } from './subscription-packages/subscription-packages.service';
+import {
+  SubscriptionPackage,
+  SubscriptionPackageSchema,
+} from './subscription-packages/entities/subscription-package.entity';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
       { name: Otp.name, schema: OtpSchema },
+      { name: SubscriptionPackage.name, schema: SubscriptionPackageSchema },
     ]),
   ],
   controllers: [
     UsersController,
     AuthController,
+    SubscriptionPackagesController,
   ],
   providers: [
     UsersService,
+    SubscriptionPackagesService,
     AuthService,
     JwtStrategy,
   ],

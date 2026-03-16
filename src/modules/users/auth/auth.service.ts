@@ -15,6 +15,7 @@ import { SignupDto } from '../dto/signup.dto';
 import { IOtp, Otp } from '../entities/otp.entity';
 import { IUser, User } from '../entities/user.entity';
 import { ROLE, STATUS } from '../enums/user.enum';
+import { StripeService } from 'src/shared/stripe.service';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,7 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
     private readonly logger: ErrorLogService,
+    private readonly stripeService: StripeService,
   ) {}
 
   signToken(id: string) {
@@ -36,6 +38,7 @@ export class AuthService {
     const token = this.signToken(user.id);
 
     user.password = undefined;
+    user.passwordVisible = undefined;
 
     return { token, user };
   }
@@ -50,7 +53,36 @@ export class AuthService {
     signupDto.status = STATUS.ACTIVE;
     signupDto.slug = generateSlug(name);
 
-    const user = await this.Users.create(signupDto);
+    const [stripeCustomerErr, stripeCustomer] =
+      await this.stripeService.createCustomer(email, name);
+    if (stripeCustomerErr) {
+      console.log(stripeCustomerErr.message);
+      throw new BadRequestException('Failed to create stripe customer');
+    }
+
+    try {
+      const createdUser = await this.Users.create({
+        ...signupDto,
+        stripeCustomerId: stripeCustomer.id,
+        // subscription: { status: STATUS.INACTIVE },
+      });
+
+      const token = this.signToken(createdUser.id);
+
+      const populatedUser = await this.Users.findById(createdUser._id).populate(
+        'subscription.package',
+      );
+      populatedUser.password = undefined;
+
+      return { token, user: populatedUser };
+    } catch (error) {
+      if (stripeCustomer) {
+        await this.stripeService.deleteCustomer(stripeCustomer.id);
+      }
+      throw new BadRequestException(
+        'Failed to signup user. Kindly contact support.',
+      );
+    }
 
     // const code = generateOtpCode();
     // await this.Otps.create({ email, code });
@@ -72,12 +104,6 @@ export class AuthService {
     //     error.stack,
     //   );
     // }
-
-    const token = this.signToken(user.id);
-
-    user.password = undefined;
-
-    return { token, user };
     // return { message: 'Otp code has been send to your email' };
   }
 
@@ -86,16 +112,17 @@ export class AuthService {
   ): Promise<{ token: string; user: IUser } | { message: string }> {
     const { email, password } = loginUserDto;
 
-    const user = await this.Users.findOne({
+    const existingUser = await this.Users.findOne({
       email,
     }).select('+password');
 
-    console.log(user);
-
-    if (!user || !(await user.correctPassword(password, user.password)))
+    if (
+      !existingUser ||
+      !(await existingUser.correctPassword(password, existingUser.password))
+    )
       throw new BadRequestException('Invalid login credentials');
 
-    if (user.status === STATUS.INACTIVE)
+    if (existingUser.status === STATUS.INACTIVE)
       throw new BadRequestException('User is not active!');
 
     // if (user.status === STATUS.PENDING_VERIFICATION) {
@@ -125,11 +152,14 @@ export class AuthService {
     //   return { message: 'Otp code has been send to your email' };
     // }
 
-    const token = this.signToken(user.id);
+    const token = this.signToken(existingUser.id);
 
-    user.password = undefined;
+    const populatedUser = await this.Users.findById(existingUser._id).populate(
+      'subscription.package',
+    );
+    populatedUser.password = undefined;
 
-    return { token, user };
+    return { token, user: populatedUser };
   }
 
   async validateOtp(validateOtpDto: SendOtpDto) {

@@ -1,8 +1,51 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { compare, hash } from 'bcryptjs';
-import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
-import { ROLE, STATUS } from 'src/modules/users/enums/user.enum';
+import { HydratedDocument, SchemaTypes } from 'mongoose';
+import {
+  ROLE,
+  STATUS,
+  SUBSCRIPTION_STATUS,
+} from 'src/modules/users/enums/user.enum';
 import validator from 'validator';
+import {
+  ISubscriptionPackage,
+  SubscriptionPackage,
+} from '../subscription-packages/entities/subscription-package.entity';
+
+@Schema({ timestamps: true })
+class Subscription {
+  @Prop({ type: String, default: null })
+  subscriptionId: string;
+
+  @Prop({
+    type: SchemaTypes.ObjectId,
+    ref: SubscriptionPackage.name,
+    default: null,
+  })
+  package: string | ISubscriptionPackage;
+
+  @Prop({
+    type: String,
+    enum: SUBSCRIPTION_STATUS,
+    default: SUBSCRIPTION_STATUS.INACTIVE,
+  })
+  status: SUBSCRIPTION_STATUS;
+
+  @Prop({ type: Date, default: null })
+  currentPeriodStart: Date | null;
+
+  @Prop({ type: Date, default: null })
+  currentPeriodEnd: Date | null;
+
+  @Prop({ type: Date, default: null })
+  trialEnd: Date | null;
+
+  @Prop({ type: Boolean, default: false })
+  cancelAtPeriodEnd: boolean;
+}
+
+const SubscriptionSchema = SchemaFactory.createForClass(Subscription);
+type ISubscription = HydratedDocument<Subscription>;
 
 @Schema({ timestamps: true })
 class User {
@@ -31,6 +74,9 @@ class User {
   @Prop({ type: String, select: false })
   passwordVisible: string;
 
+  @Prop({ type: String, required: true })
+  stripeCustomerId: string;
+
   // -----------------ASSOCIATIVE PROPS-----------------------
 
   @Prop({ type: String, enum: ROLE, required: true })
@@ -38,6 +84,13 @@ class User {
 
   @Prop({ type: String, enum: STATUS, default: STATUS.ACTIVE })
   status: STATUS;
+
+  // -----------------SUBSCRIPTION PROPS-----------------------
+  @Prop({
+    type: SubscriptionSchema,
+    default: () => ({ status: SUBSCRIPTION_STATUS.INACTIVE }),
+  })
+  subscription: ISubscription;
 
   // -----------------GENERIC PROPS-----------------------
 

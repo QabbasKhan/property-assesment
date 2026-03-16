@@ -10,11 +10,16 @@ import { EmailService } from 'src/shared/email.service';
 import { ErrorLogService } from 'src/shared/error-log.service';
 import { IUser, User } from './entities/user.entity';
 import { ROLE, STATUS } from './enums/user.enum';
+import { Pagination } from 'src/common/utils/types.util';
+import { UpdateMeDto } from './dto/update-me.dto';
+import { UpdateUserDto } from './dto/create-user.dto';
+import { SubscriptionPackagesService } from './subscription-packages/subscription-packages.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly Users: Model<IUser>,
+    private readonly subscriptionPackagesService: SubscriptionPackagesService,
     private readonly configService: ConfigService,
     private readonly logger: ErrorLogService,
     private readonly emailService: EmailService,
@@ -24,7 +29,57 @@ export class UsersService {
     if (user.status !== STATUS.ACTIVE)
       throw new UnauthorizedException('User is not active');
 
+    return await this.Users.findById(user._id).populate('subscription.package');
+  }
+
+  async findOne(id: string): Promise<IUser> {
+    const user = await this.Users.findById(id);
+    if (!user || user.isDeleted) throw new NotFoundException('User not found');
     return user;
+  }
+
+  async updateOne(updateUserDto: UpdateUserDto): Promise<IUser> {
+    const user = await this.Users.findByIdAndUpdate(
+      updateUserDto.id,
+      { status: updateUserDto.status },
+      { new: true },
+    );
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async updateMe(user: IUser, updateMeDto: UpdateMeDto): Promise<IUser> {
+    const updatedUser = await this.Users.findByIdAndUpdate(
+      user._id,
+      updateMeDto,
+      {
+        new: true,
+      },
+    );
+    if (!updatedUser) throw new NotFoundException('User not found');
+    return updatedUser;
+  }
+
+  async findAll(pagination: Pagination, query: { search?: string }) {
+    const filter: any = {
+      ...(query.search && {
+        $or: [
+          { name: { $regex: query.search, $options: 'i' } },
+          { email: { $regex: query.search, $options: 'i' } },
+        ],
+      }),
+      isDeleted: false,
+    };
+
+    const [users, totalCount] = await Promise.all([
+      this.Users.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(pagination.skip)
+        .limit(pagination.limit),
+      this.Users.countDocuments(filter),
+    ]);
+
+    return { data: users || [], total: totalCount || 0 };
   }
   // SOFT DELETE
   async delete(id: string): Promise<IUser> {
@@ -43,6 +98,42 @@ export class UsersService {
 
     if (!user) throw new NotFoundException('User not found');
     return user;
+  }
+
+  async buySubscription(
+    user: IUser,
+    buySubscriptionDto: { packageId: string },
+  ) {
+    if (!buySubscriptionDto.packageId)
+      throw new NotFoundException('Package ID is required');
+
+    if (user.subscription?.status === 'active')
+      throw new NotFoundException('User already has an active subscription');
+
+    const pkg = await this.subscriptionPackagesService.findOneHelper({
+      _id: buySubscriptionDto.packageId,
+    });
+    if (!pkg) throw new NotFoundException('Package not found');
+
+    console.log('Buying subscription for user:', user);
+    console.log('Selected package:', pkg);
+
+    return await this.Users.findByIdAndUpdate(
+      user._id,
+      {
+        subscription: {
+          package: pkg._id,
+          status: 'active',
+          stripeSubscriptionId: 'abc_10006265765',
+          currentPeriodStart: new Date(),
+          currentPeriodEnd: new Date(
+            new Date().setMonth(new Date().getMonth() + 1),
+          ),
+          analysisCount: pkg.totalAnalysis,
+        },
+      },
+      { new: true },
+    );
   }
 
   //----------------- HELPER FUNCTIONS ----------------//
