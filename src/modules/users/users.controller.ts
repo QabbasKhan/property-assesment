@@ -33,7 +33,10 @@ export class UsersController {
 
   // @Auth(ROLE.ADMIN)
   @Get('/find-all')
-  async findAll(pagination: Pagination, @Query() query: { search?: string }) {
+  async findAll(
+    pagination: Pagination,
+    @Query() query: { search?: string; status: string },
+  ) {
     const data = await this.usersService.findAll(pagination, query);
     return { data };
   }
