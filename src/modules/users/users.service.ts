@@ -60,7 +60,10 @@ export class UsersService {
     return updatedUser;
   }
 
-  async findAll(pagination: Pagination, query: { search?: string }) {
+  async findAll(
+    pagination: Pagination,
+    query: { search?: string; status?: string },
+  ) {
     const filter: any = {
       ...(query.search && {
         $or: [
@@ -69,17 +72,48 @@ export class UsersService {
         ],
       }),
       isDeleted: false,
+      ...(query.status && query.status !== 'all' && { status: query.status }),
     };
 
-    const [users, totalCount] = await Promise.all([
-      this.Users.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(pagination.skip)
-        .limit(pagination.limit),
-      this.Users.countDocuments(filter),
+    const [data] = await this.Users.aggregate([
+      { $match: filter },
+      {
+        $facet: {
+          users: [
+            { $sort: { createdAt: -1 } },
+            { $skip: pagination?.skip || 0 },
+            { $limit: pagination?.limit || 10 },
+            {
+              $lookup: {
+                from: 'subscriptionpackages',
+                localField: 'subscription.package',
+                foreignField: '_id',
+                as: 'subscription.package',
+              },
+            },
+            {
+              $unwind: {
+                path: '$subscription.package',
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                email: 1,
+                role: 1,
+                status: 1,
+                subscription: 1,
+              },
+            },
+          ],
+          totalCount: [{ $count: 'count' }],
+        },
+      },
     ]);
 
-    return { data: users || [], total: totalCount || 0 };
+    return { data: data.users || [], total: data.totalCount[0]?.count || 0 };
   }
   // SOFT DELETE
   async delete(id: string): Promise<IUser> {

@@ -31,8 +31,8 @@ export class UsersController {
     return { data };
   }
 
-  @Auth(ROLE.ADMIN)
-  @Get('/all')
+  // @Auth(ROLE.ADMIN)
+  @Get('/find-all')
   async findAll(pagination: Pagination, @Query() query: { search?: string }) {
     const data = await this.usersService.findAll(pagination, query);
     return { data };
