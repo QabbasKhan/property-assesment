@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -14,26 +16,32 @@ import { Pagination } from 'src/common/utils/types.util';
 import { UpdateMeDto } from './dto/update-me.dto';
 import { UpdateUserDto } from './dto/create-user.dto';
 import { SubscriptionPackagesService } from './subscription-packages/subscription-packages.service';
-
+import { NotificationsService } from '../sockets/notifications/notifications.service';
+import { TransactionsService } from '../transactions/transactions.service';
+import { FLAG } from '../sockets/enums/notification.enum';
+import { SENDER_MODE } from '../sockets/enums/notification.enum';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly Users: Model<IUser>,
     private readonly subscriptionPackagesService: SubscriptionPackagesService,
-    private readonly configService: ConfigService,
-    private readonly logger: ErrorLogService,
     private readonly emailService: EmailService,
+    private readonly transactionsService: TransactionsService,
+    @Inject(forwardRef(() => NotificationsService))
+    private readonly notificationService: NotificationsService,
   ) {}
 
   async getMe(user: IUser): Promise<IUser> {
     if (user.status !== STATUS.ACTIVE)
       throw new UnauthorizedException('User is not active');
 
-    return await this.Users.findById(user._id).populate('subscription.package');
+    await user.populate('subscription.package');
+
+    return user;
   }
 
   async findOne(id: string): Promise<IUser> {
-    const user = await this.Users.findById(id);
+    const user = await this.Users.findById(id).populate('subscription.package');
     if (!user || user.isDeleted) throw new NotFoundException('User not found');
     return user;
   }
@@ -44,6 +52,7 @@ export class UsersService {
       { status: updateUserDto.status },
       { new: true },
     );
+    await user.populate('subscription.package');
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
@@ -56,6 +65,8 @@ export class UsersService {
         new: true,
       },
     );
+    await user.populate('subscription.package');
+
     if (!updatedUser) throw new NotFoundException('User not found');
     return updatedUser;
   }
@@ -65,6 +76,7 @@ export class UsersService {
     query: { search?: string; status?: string },
   ) {
     const filter: any = {
+      role: { $ne: ROLE.ADMIN },
       ...(query.search && {
         $or: [
           { name: { $regex: query.search, $options: 'i' } },
@@ -98,6 +110,15 @@ export class UsersService {
               },
             },
             {
+              $lookup: {
+                from: 'analysis',
+                localField: '_id',
+                foreignField: 'user',
+                as: 'analysis',
+              },
+            },
+            { $addFields: { analysisCount: { $size: '$analysis' } } },
+            {
               $project: {
                 _id: 1,
                 name: 1,
@@ -105,6 +126,7 @@ export class UsersService {
                 role: 1,
                 status: 1,
                 subscription: 1,
+                analysisCount: 1,
               },
             },
           ],
@@ -149,8 +171,50 @@ export class UsersService {
     });
     if (!pkg) throw new NotFoundException('Package not found');
 
-    console.log('Buying subscription for user:', user);
-    console.log('Selected package:', pkg);
+    const transaction = await this.transactionsService.create({
+      user: user._id.toString(),
+      package: pkg._id.toString(),
+      amount: pkg.price,
+      transactionId: `TXN-${Date.now()}`,
+      status: 'success',
+      type: 'subscription-purchase',
+    });
+
+    await Promise.all([
+      this.notificationService.createNotification({
+        senderMode: SENDER_MODE.USER,
+        from: user._id,
+        to: 'admin',
+        title: 'New Subscription Purchase',
+        message: `${user.name} has purchased the ${pkg.name} subscription package.`,
+        flag: FLAG.USER,
+        payload: {
+          userId: user._id.toString(),
+        },
+      }),
+      this.notificationService.createNotification({
+        senderMode: SENDER_MODE.ADMIN,
+        from: 'admin',
+        to: user._id,
+        title: 'Subscription Activated!',
+        message: `Your subscription to the ${pkg.name} package has been activated. You have ${pkg.totalAnalysis} analyses available.`,
+        flag: FLAG.SUBSCRIPTION,
+        payload: {
+          userId: user._id.toString(),
+        },
+      }),
+      this.notificationService.createNotification({
+        senderMode: SENDER_MODE.USER,
+        from: user._id,
+        to: 'admin',
+        title: 'New Transaction!',
+        message: `${user.name} has made a new transaction of amount ${pkg.price}.`,
+        flag: FLAG.TRANSACTION,
+        payload: {
+          transactionId: transaction._id.toString(),
+        },
+      }),
+    ]);
 
     return await this.Users.findByIdAndUpdate(
       user._id,

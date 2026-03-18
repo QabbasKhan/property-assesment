@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { forwardRef, Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from '../users/users.module';
 
@@ -17,7 +17,7 @@ import { ChatsController } from './chats/chats.controller';
 @Global()
 @Module({
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     MongooseModule.forFeature([
       { name: Notification.name, schema: NotificationSchema },
       { name: Room.name, schema: RoomSchema },

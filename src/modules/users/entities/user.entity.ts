@@ -42,6 +42,9 @@ class Subscription {
 
   @Prop({ type: Boolean, default: false })
   cancelAtPeriodEnd: boolean;
+
+  @Prop({ type: Number, default: 0 })
+  availableAnalysis: number;
 }
 
 const SubscriptionSchema = SchemaFactory.createForClass(Subscription);

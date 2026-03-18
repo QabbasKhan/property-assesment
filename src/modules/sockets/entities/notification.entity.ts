@@ -9,6 +9,16 @@ class Payload {
     type: String,
   })
   room: string;
+
+  @Prop({
+    type: String,
+  })
+  transactionId: string;
+
+  @Prop({
+    type: String,
+  })
+  userId: string;
 }
 
 const PayloadSchema = SchemaFactory.createForClass(Payload);

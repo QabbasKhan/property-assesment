@@ -16,6 +16,7 @@ import { IOtp, Otp } from '../entities/otp.entity';
 import { IUser, User } from '../entities/user.entity';
 import { ROLE, STATUS } from '../enums/user.enum';
 import { StripeService } from 'src/shared/stripe.service';
+import { FLAG, SENDER_MODE } from 'src/modules/sockets/enums/notification.enum';
 
 @Injectable()
 export class AuthService {
@@ -24,6 +25,7 @@ export class AuthService {
     @InjectModel(Otp.name) private readonly Otps: Model<IOtp>,
     private readonly configService: ConfigService,
     private readonly emailService: EmailService,
+    private readonly notificationService: NotificationsService,
     private readonly logger: ErrorLogService,
     private readonly stripeService: StripeService,
   ) {}
@@ -73,6 +75,18 @@ export class AuthService {
         'subscription.package',
       );
       populatedUser.password = undefined;
+
+      await this.notificationService.createNotification({
+        senderMode: SENDER_MODE.USER,
+        from: createdUser._id,
+        to: 'admin',
+        title: 'New Signup!',
+        message: `New user, ${createdUser.name} has signed up with email ${createdUser.email}`,
+        flag: FLAG.USER,
+        payload: {
+          userId: createdUser._id.toString(),
+        },
+      });
 
       return { token, user: populatedUser };
     } catch (error) {

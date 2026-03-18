@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
@@ -13,6 +13,8 @@ import {
   SubscriptionPackage,
   SubscriptionPackageSchema,
 } from './subscription-packages/entities/subscription-package.entity';
+import { TransactionsModule } from '../transactions/transactions.module';
+import { SocketsModule } from '../sockets/sockets.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -20,6 +22,8 @@ import {
       { name: Otp.name, schema: OtpSchema },
       { name: SubscriptionPackage.name, schema: SubscriptionPackageSchema },
     ]),
+    TransactionsModule,
+    forwardRef(() => SocketsModule),
   ],
   controllers: [
     UsersController,

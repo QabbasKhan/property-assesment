@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import moment from 'moment';
 import { Model, Types } from 'mongoose';
@@ -16,6 +16,7 @@ export class NotificationsService {
     @InjectModel(Notification.name)
     private readonly Notifications: Model<INotification>,
     private readonly socket: PrivateSocketsGateway,
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
   ) {}
 
@@ -40,7 +41,7 @@ export class NotificationsService {
       this.Notifications.find({
         receiver: user._id,
       })
-        .populate('sender', 'firstName lastName socketIds photo')
+        .populate('sender', 'name socketIds photo')
         .sort({ createdAt: -1 })
         .skip(pagination.skip)
         .limit(pagination.limit)

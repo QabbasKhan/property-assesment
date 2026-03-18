@@ -1,9 +1,8 @@
 export enum FLAG {
   NONE = 'none',
-  ORDER = 'order',
-  PRODUCT = 'product',
+  SUBSCRIPTION = 'subscription',
   USER = 'user',
-  TERRITORY = '',
+  TRANSACTION = 'transaction',
 }
 
 export enum SENDER_MODE {

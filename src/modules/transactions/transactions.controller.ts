@@ -1,34 +1,36 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { Pagination } from 'src/common/utils/types.util';
+import { Paginate } from 'src/common/decorators/pagination.decorator';
+import { Auth } from 'src/common/decorators/auth.decorator';
+import { ROLE } from '../users/enums/user.enum';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
+import { IUser } from '../users/entities/user.entity';
 
-@Controller('transactions')
+@ApiTags('Transactions')
+@Controller({ path: 'transactions', version: '1' })
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
-  @Post()
-  create(@Body() createTransactionDto: CreateTransactionDto) {
-    return this.transactionsService.create(createTransactionDto);
+  @Auth(ROLE.USER)
+  @Get('user/my')
+  async findMy(
+    @GetUser() user: IUser,
+    @Paginate() pagination: Pagination,
+    @Query() query: { search: string },
+  ) {
+    const data = await this.transactionsService.findMy(user, pagination, query);
+    return { data };
   }
 
-  @Get()
-  findAll() {
-    return this.transactionsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService.update(+id, updateTransactionDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionsService.remove(+id);
+  // @Auth(ROLE.ADMIN)
+  @Get('admin/find-all')
+  async adminFindAll(
+    @Query() query: { search: string },
+    @Paginate() pagination: Pagination,
+  ) {
+    const data = await this.transactionsService.adminFindAll(pagination, query);
+    return { data };
   }
 }

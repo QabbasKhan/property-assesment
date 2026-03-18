@@ -12,6 +12,7 @@ import { SocketsModule } from './modules/sockets/sockets.module';
 import { UsersModule } from './modules/users/users.module';
 import { SharedModule } from './shared/shared.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     SocketsModule,
     SharedModule,
     AnalyticsModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
   providers: [

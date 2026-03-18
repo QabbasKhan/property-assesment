@@ -53,15 +53,4 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   @IsString()
   @IsEnum(STATUS)
   status: STATUS;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  packageHours: number;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsNumber()
-  balance: number;
 }

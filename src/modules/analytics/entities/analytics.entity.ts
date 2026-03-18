@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, HydratedDocument, SchemaTypes } from 'mongoose';
+import { Document, HydratedDocument, SchemaTypes, Types } from 'mongoose';
 import { DROP_DOWN } from '../enums/input-fields.enum';
+import { IUser } from 'src/modules/users/entities/user.entity';
 
 @Schema({ timestamps: true })
 export class Analytics {
@@ -11,7 +12,7 @@ export class Analytics {
   name: string;
 
   @Prop({ type: SchemaTypes.ObjectId, ref: 'User', default: null })
-  user: string;
+  user: Types.ObjectId | IUser;
 
   @Prop({ required: true })
   location: string;

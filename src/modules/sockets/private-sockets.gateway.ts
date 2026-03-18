@@ -31,7 +31,10 @@ export class PrivateSocketsGateway
   @WebSocketServer() server: Server;
   constructor(
     private readonly configService: ConfigService,
+
+    @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
+
     @Inject(forwardRef(() => ChatsService))
     private readonly chatService: ChatsService,
   ) {}
