@@ -1,6 +1,7 @@
 export enum CMS_TYPE {
-    HOME = 'HOME',
-    FOOTER = 'FOOTER',
-    ABOUT_US = 'ABOUT_US',
-    CONTACT_US = 'CONTACT_US',
+  HOME = 'home',
+  FOOTER = 'footer',
+  ABOUT_US = 'about_us',
+  PRODUCT = 'product',
+  CONTACT_US = 'contact_us',
 }

@@ -16,7 +16,7 @@ export class TransactionsController {
   @Auth(ROLE.USER)
   @Get('user/my')
   async findMy(
-    @GetUser() user: IUser,
+    @GetUser() user: IUser,s
     @Paginate() pagination: Pagination,
     @Query() query: { search: string },
   ) {
@@ -24,7 +24,7 @@ export class TransactionsController {
     return { data };
   }
 
-  // @Auth(ROLE.ADMIN)
+  @Auth(ROLE.ADMIN)
   @Get('admin/find-all')
   async adminFindAll(
     @Query() query: { search: string },

@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { EmailService } from './email.service';
 import { ErrorLogService } from './error-log.service';
-// import { S3Service } from './s3.service';
+import { S3Service } from './s3.service';
 import { SharedController } from './shared.controller';
 import { SharedService } from './shared.service';
 import { StripeService } from './stripe.service';
@@ -14,14 +14,14 @@ import { StripeService } from './stripe.service';
     EmailService,
     ErrorLogService,
     StripeService,
-    // S3Service,
+    S3Service,
   ],
   exports: [
     SharedService,
     EmailService,
     ErrorLogService,
     StripeService,
-    // S3Service,
+    S3Service,
   ],
 })
 export class SharedModule {}
