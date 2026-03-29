@@ -24,23 +24,22 @@ export class SubscriptionPackagesService {
 
   async create(createSubscriptionPackageDto: CreateSubscriptionPackageDto) {
     const [stripeProductError, stripeProduct] =
-      await this.stripeService.createProduct(
-        createSubscriptionPackageDto.name,
-        createSubscriptionPackageDto.description,
-        { type: createSubscriptionPackageDto.type },
-      );
+      await this.stripeService.createStripeProduct({
+        name: createSubscriptionPackageDto.name,
+        description: createSubscriptionPackageDto.description,
+        metadata: { type: createSubscriptionPackageDto.type },
+      });
 
     if (stripeProductError) {
       throw new BadRequestException(stripeProductError.message);
     }
 
     const [stripePriceError, stripePrice] =
-      await this.stripeService.createPrice(
-        stripeProduct.id,
-        createSubscriptionPackageDto.price,
-        'usd',
-        createSubscriptionPackageDto.interval,
-      );
+      await this.stripeService.createRecurringPrice({
+        product: stripeProduct.id,
+        price: createSubscriptionPackageDto.price,
+        interval: createSubscriptionPackageDto.interval,
+      });
 
     if (stripePriceError) {
       throw new BadRequestException(stripePriceError.message);

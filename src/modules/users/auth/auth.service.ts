@@ -56,7 +56,7 @@ export class AuthService {
     signupDto.slug = generateSlug(name);
 
     const [stripeCustomerErr, stripeCustomer] =
-      await this.stripeService.createCustomer(email, name);
+      await this.stripeService.createStripeCustomer({ email, name });
     if (stripeCustomerErr) {
       console.log(stripeCustomerErr.message);
       throw new BadRequestException('Failed to create stripe customer');
@@ -91,7 +91,7 @@ export class AuthService {
       return { token, user: populatedUser };
     } catch (error) {
       if (stripeCustomer) {
-        await this.stripeService.deleteCustomer(stripeCustomer.id);
+        await this.stripeService.deleteStripeCustomer(stripeCustomer.id);
       }
       throw new BadRequestException(
         'Failed to signup user. Kindly contact support.',

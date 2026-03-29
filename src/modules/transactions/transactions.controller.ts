@@ -16,7 +16,7 @@ export class TransactionsController {
   @Auth(ROLE.USER)
   @Get('user/my')
   async findMy(
-    @GetUser() user: IUser,s
+    @GetUser() user: IUser,
     @Paginate() pagination: Pagination,
     @Query() query: { search: string },
   ) {
