@@ -19,6 +19,9 @@ import { UpdateMeDto } from './dto/update-me.dto';
 import { UpdateUserDto } from './dto/create-user.dto';
 import { Pagination } from 'src/common/utils/types.util';
 import { Paginate } from 'src/common/decorators/pagination.decorator';
+import { Req } from '@nestjs/common';
+import { Res } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 @ApiTags('Users')
 @Controller({ path: 'users', version: '1' })
@@ -74,6 +77,13 @@ export class UsersController {
   async updateMe(@GetUser() user: IUser, @Body() updateMeDto: UpdateMeDto) {
     const data = await this.usersService.updateMe(user, updateMeDto);
     return { data };
+  }
+
+  @Post('subscription/webhook')
+  async stripeWebhook(@Req() req: Request, @Res() res: Response) {
+    const response = await this.usersService.stripeWebhook(req);
+
+    res.status(200).json(response);
   }
 
   @Auth(ROLE.ADMIN)

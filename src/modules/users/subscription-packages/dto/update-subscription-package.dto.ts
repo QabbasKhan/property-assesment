@@ -6,7 +6,7 @@ import { PACKAGE_STATUS, PACKAGE_TYPE } from '../../enums/package.enum';
 export class UpdateSubscriptionPackageDto {
   @ApiProperty({ description: 'Package Mongo Id (_id)' })
   @IsMongoId()
-  id: Types.ObjectId;
+  id: Types.ObjectId | string;
 
   @ApiProperty({
     example: 'Basic Plan',

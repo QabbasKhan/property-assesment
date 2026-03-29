@@ -10,6 +10,7 @@ import { AppModule } from './app.module';
 import { ParamValidationPipe } from './common/pipes/param-validation.pipe';
 import { ConfigService } from './config/config.service';
 import { setupSwagger } from './swagger';
+import express from 'express';
 
 declare const module: any;
 
@@ -23,7 +24,6 @@ async function bootstrap() {
 
   app.enableCors({ origin: '*' });
 
-
   // Middleware to redirect base URL to /docs
   app.use((req: Request, res: Response, next: any) => {
     if (req.path === '/') {
@@ -31,6 +31,11 @@ async function bootstrap() {
     }
     next();
   });
+
+  app.use(
+    '/api/v1/users/subscription/webhook',
+    express.raw({ type: 'application/json' }),
+  );
 
   app.use(cookieParser());
   app.use(compression());

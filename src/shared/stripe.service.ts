@@ -385,6 +385,7 @@ export class StripeService {
     };
     isTrial?: boolean;
   }): Promise<[Error, Stripe.Checkout.Session]> {
+    console.log('CHECKOUT: ', checkoutSession);
     try {
       const session = await this.stripe.checkout.sessions.create({
         mode: checkoutSession.mode,

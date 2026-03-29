@@ -257,12 +257,12 @@ export class UsersService {
     if (!subscriptionPackage)
       throw new BadRequestException('No Package found with that Id.');
 
-    if (
-      user.subscription &&
-      user.subscription?.status === SUBSCRIPTION_STATUS.ACTIVE
-    ) {
-      throw new BadRequestException('You already have an active subscription.');
-    }
+    // if (
+    //   user.subscription &&
+    //   user.subscription?.status === SUBSCRIPTION_STATUS.ACTIVE
+    // ) {
+    //   throw new BadRequestException('You already have an active subscription.');
+    // }
 
     const [error, checkoutSession] =
       await this.stripeService.createCheckoutSession({
@@ -284,7 +284,9 @@ export class UsersService {
       });
 
     if (error) {
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(
+        `Failed to create checkout, ${error.message}`,
+      );
     }
 
     return { url: checkoutSession.url };
@@ -577,12 +579,22 @@ export class UsersService {
       case 'customer.subscription.created': {
         const subscription = dataObject as Stripe.Subscription;
 
+        const pkg = await this.subscriptionPackagesService.findOneHelper({
+          stripePriceId: subscription.items.data[0].price.id,
+        });
+        if (!pkg) {
+          console.log(
+            `No package found with stripe price id: ${subscription.items.data[0].price.id}`,
+          );
+          return null;
+        }
+
         const user = await this.updateOneHelper(
           { stripeCustomerId: subscription.customer as string },
           {
             subscription: {
               subscriptionId: subscription.id,
-              package: subscription.items.data[0].price.metadata.packageId,
+              package: pkg?._id,
               currentPeriodStart: new Date(
                 subscription.items.data[0].current_period_start * 1000,
               ),
@@ -591,6 +603,7 @@ export class UsersService {
               ),
               status: subscription.status as SUBSCRIPTION_STATUS,
               cancelAtPeriodEnd: subscription.cancel_at_period_end,
+              availableAnalysis: pkg?.totalAnalysis || 0,
             },
           },
         );
@@ -610,14 +623,16 @@ export class UsersService {
         console.log('customer.subscription.updated event received');
 
         const subscription = dataObject as Stripe.Subscription;
+        const pkg = await this.subscriptionPackagesService.findOneHelper({
+          stripePriceId: subscription.items.data[0].price.id,
+        });
 
         const user = await this.updateOneHelper(
           { stripeCustomerId: subscription.customer as string },
           {
             subscription: {
               subscriptionId: subscription.id,
-              package: subscription.items.data[0].price.metadata.packageId,
-              priceId: subscription.items.data[0].price.id,
+              package: pkg._id,
               currentPeriodStart: new Date(
                 subscription.items.data[0].current_period_start * 1000,
               ),
@@ -626,6 +641,7 @@ export class UsersService {
               ),
               status: subscription.status as SUBSCRIPTION_STATUS,
               cancelAtPeriodEnd: subscription.cancel_at_period_end,
+              availableAnalysis: pkg.totalAnalysis || 0,
             },
           },
         );
