@@ -65,6 +65,26 @@ export class UsersController {
     return { data };
   }
 
+  @Auth(ROLE.USER)
+  @Post('update-subscription')
+  async updateSubscription(
+    @GetUser() user: IUser,
+    @Body() updateSubscriptionDto: { packageId: string },
+  ) {
+    const data = await this.usersService.updateSubscription(
+      user,
+      updateSubscriptionDto,
+    );
+    return { data };
+  }
+
+  @Auth(ROLE.USER)
+  @Post('cancel-subscription')
+  async cancelSubscription(@GetUser() user: IUser) {
+    const data = await this.usersService.cancelSubscription(user);
+    return { data };
+  }
+
   @Auth(ROLE.ADMIN)
   @Patch('update-user')
   async updateOne(@Body() updateUserDto: UpdateUserDto) {

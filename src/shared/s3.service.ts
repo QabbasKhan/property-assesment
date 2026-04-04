@@ -182,7 +182,11 @@ export class S3Service {
     try {
       await this.s3.send(command);
     } catch (error) {
-      this.logger.logError(error.message, 'Delete File', error.stack);
+      this.logger.logError(
+        (error as Error).message,
+        'Delete File',
+        (error as Error).stack,
+      );
     }
   }
 

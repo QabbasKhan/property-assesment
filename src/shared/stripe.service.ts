@@ -23,7 +23,7 @@ export class StripeService {
       const customer = await this.stripe.customers.create(customerParams);
       return [null, customer];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -34,7 +34,7 @@ export class StripeService {
       const customer = await this.stripe.customers.retrieve(customerId);
       return [null, customer as Stripe.Customer];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -45,7 +45,7 @@ export class StripeService {
       const customer = await this.stripe.customers.del(customerId);
       return [null, customer];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -132,7 +132,7 @@ export class StripeService {
       const product = await this.stripe.products.create(productParams);
       return [null, product];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -141,7 +141,7 @@ export class StripeService {
       const product = await this.stripe.products.retrieve(productId);
       return [null, product as Stripe.Product];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -162,7 +162,7 @@ export class StripeService {
       return [null, product];
     } catch (error) {
       console.log('STRIPE SERVICE', error);
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -173,7 +173,7 @@ export class StripeService {
       const product = await this.stripe.products.del(productId);
       return [null, product];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -195,7 +195,7 @@ export class StripeService {
       });
       return [null, price];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -215,7 +215,7 @@ export class StripeService {
       });
       return [null, price];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -239,7 +239,7 @@ export class StripeService {
       });
       return [null, price];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -248,7 +248,7 @@ export class StripeService {
       const price = await this.stripe.prices.retrieve(priceId);
       return [null, price as Stripe.Price];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -275,7 +275,7 @@ export class StripeService {
 
       return [null, newPrice];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -287,7 +287,7 @@ export class StripeService {
         await this.stripe.subscriptions.retrieve(subscriptionId);
       return [null, subscription as Stripe.Subscription];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -327,7 +327,7 @@ export class StripeService {
       );
       return [null, updatedSubscription];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -409,7 +409,7 @@ export class StripeService {
       });
       return [null, session];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -420,7 +420,7 @@ export class StripeService {
       const invoice = await this.stripe.invoices.retrieve(invoiceId);
       return [null, invoice];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -441,7 +441,7 @@ export class StripeService {
 
       return [null, event];
     } catch (err) {
-      return [err, null];
+      return [err as Error, null];
     }
   }
 
@@ -453,7 +453,7 @@ export class StripeService {
         await this.stripe.setupIntents.retrieve(setupIntentId);
       return [null, setupIntent];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 
@@ -469,7 +469,7 @@ export class StripeService {
       );
       return [null, paymentIntent];
     } catch (error) {
-      return [error, null];
+      return [error as Error, null];
     }
   }
 }

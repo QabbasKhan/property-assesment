@@ -314,7 +314,7 @@ export class UsersService {
       );
 
     if (error) {
-      throw new BadRequestException(error.message);
+      throw new BadRequestException((error as Error).message);
     }
 
     return renewedSubscription;
@@ -335,13 +335,18 @@ export class UsersService {
       );
 
     if (error) {
-      throw new BadRequestException(error.message);
+      throw new BadRequestException((error as Error).message);
     }
 
     return cancelledSubscription;
   }
 
-  async updateSubscription(user: IUser, packageId: string) {
+  async updateSubscription(
+    user: IUser,
+    updateSubscriptionDto: { packageId: string },
+  ) {
+    const { packageId } = updateSubscriptionDto;
+
     if (!packageId) {
       throw new BadRequestException('Package Id is required.');
     }
@@ -555,7 +560,7 @@ export class UsersService {
                   if (err4) {
                     console.log('Error while setup in stripe webhook');
 
-                    throw new BadRequestException(err4.message);
+                    throw new BadRequestException((err4 as Error).message);
                   }
 
                   return {
@@ -609,6 +614,31 @@ export class UsersService {
         );
 
         await user.populate([{ path: 'subscription.package' }]);
+
+        await Promise.all([
+          this.notificationService.createNotification({
+            senderMode: SENDER_MODE.USER,
+            from: user._id,
+            to: 'admin',
+            title: 'New Subscription Purchase',
+            message: `${user.name} has purchased the ${pkg.name} subscription package.`,
+            flag: FLAG.USER,
+            payload: {
+              userId: user._id.toString(),
+            },
+          }),
+          this.notificationService.createNotification({
+            senderMode: SENDER_MODE.ADMIN,
+            from: 'admin',
+            to: user._id,
+            title: 'Subscription Activated!',
+            message: `Your subscription to the ${pkg.name} package has been activated. You have ${pkg.totalAnalysis} analyses available.`,
+            flag: FLAG.SUBSCRIPTION,
+            payload: {
+              userId: user._id.toString(),
+            },
+          }),
+        ]);
 
         // if (user.socketIds.length > 0) {
         //   PrivateSocketRef.getServer()
