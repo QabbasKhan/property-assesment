@@ -25,7 +25,7 @@ export class ConfigService {
     try {
       const config = dotenv.parse(fs.readFileSync(envFile));
       this.envConfig = { ...config, ...process.env };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Error reading config file ${envFile}: ${error.message}`);
     }
   }

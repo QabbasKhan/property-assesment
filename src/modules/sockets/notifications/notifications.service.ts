@@ -147,7 +147,7 @@ export class NotificationsService {
 
     await this.Notifications.create({
       ...notification,
-      sender: from,
+      sender: notification.from,
       receiver: toUser._id,
       createdAt: moment().utc().toDate(),
     });

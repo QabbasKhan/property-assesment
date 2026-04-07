@@ -40,6 +40,9 @@ class Subscription {
   @Prop({ type: Date, default: null })
   trialEnd: Date | null;
 
+  @Prop({ type: String, default: null })
+  trialPeriod: string;
+
   @Prop({ type: Boolean, default: false })
   cancelAtPeriodEnd: boolean;
 
