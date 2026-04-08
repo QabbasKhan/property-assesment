@@ -81,7 +81,7 @@ export class TransactionsService {
 
   async findMy(user: IUser, pagination: Pagination, query: { search: string }) {
     const dbQuery = {
-      user: user._id,
+      'user._id': user._id,
       ...(query.search && {
         $or: [
           { transactionId: { $regex: query.search, $options: 'i' } },
@@ -92,6 +92,15 @@ export class TransactionsService {
     };
 
     const [data] = await this.Transaction.aggregate([
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user',
+          foreignField: '_id',
+          as: 'user',
+        },
+      },
+      { $unwind: '$user' },
       { $match: dbQuery },
       {
         $facet: {
