@@ -240,7 +240,7 @@ export class AuthService {
         },
         { code: createOtpDto.code },
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.logError(error.message, 'Forgot Password', error.stack);
       throw new BadRequestException('failed to send otp code');
     }
@@ -290,7 +290,7 @@ export class AuthService {
         },
         { code: createOtpDto.code },
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.logError(
         error.message,
         'Error while sending email on resend otp',

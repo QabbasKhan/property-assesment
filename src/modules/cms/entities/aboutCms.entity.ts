@@ -25,6 +25,9 @@ class About {
 
   @Prop({ type: String, default: null })
   visionText: string;
+
+  @Prop({ type: String, default: null })
+  image: string;
 }
 
 const AboutSchema = SchemaFactory.createForClass(About);

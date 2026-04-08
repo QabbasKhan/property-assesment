@@ -51,7 +51,7 @@ export class UpdateSubscriptionPackageDto {
   })
   @IsOptional()
   @IsNumber()
-  totalAnalyses?: number;
+  totalAnalysis?: number;
 
   @ApiProperty({ enum: PACKAGE_STATUS })
   @IsOptional()

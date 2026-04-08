@@ -257,12 +257,12 @@ export class UsersService {
     if (!subscriptionPackage)
       throw new BadRequestException('No Package found with that Id.');
 
-    // if (
-    //   user.subscription &&
-    //   user.subscription?.status === SUBSCRIPTION_STATUS.ACTIVE
-    // ) {
-    //   throw new BadRequestException('You already have an active subscription.');
-    // }
+    if (
+      user.subscription &&
+      user.subscription?.status === SUBSCRIPTION_STATUS.ACTIVE
+    ) {
+      throw new BadRequestException('You already have an active subscription.');
+    }
 
     const [error, checkoutSession] =
       await this.stripeService.createCheckoutSession({
@@ -280,7 +280,7 @@ export class UsersService {
           packageId: subscriptionPackage._id.toString(),
           priceId: subscriptionPackage.stripePriceId,
         },
-        isTrial: false,
+        isTrial: subscriptionPackage.hasTrial,
       });
 
     if (error) {

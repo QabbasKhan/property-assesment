@@ -83,9 +83,11 @@ export class TransactionsService {
     const dbQuery = {
       user: user._id,
       ...(query.search && {
-        transactionId: { $regex: query.search, $options: 'i' },
-        'user.name': { $regex: query.search, $options: 'i' },
-        'user.email': { $regex: query.search, $options: 'i' },
+        $or: [
+          { transactionId: { $regex: query.search, $options: 'i' } },
+          { 'user.name': { $regex: query.search, $options: 'i' } },
+          { 'user.email': { $regex: query.search, $options: 'i' } },
+        ],
       }),
     };
 

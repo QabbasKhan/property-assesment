@@ -13,6 +13,7 @@ import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { StripeService } from 'src/shared/stripe.service';
 import { PACKAGE_STATUS } from '../enums/package.enum';
+import { console } from 'inspector';
 
 @Injectable()
 export class SubscriptionPackagesService {

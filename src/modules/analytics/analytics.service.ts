@@ -50,6 +50,15 @@ export class AnalyticsService {
   }
 
   async create(user: IUser, createAnalyticsDto: CreateAnalyticsDto) {
+    const hasAvailableAnalysis =
+      user.subscription?.availableAnalysis === -1 ||
+      user.subscription?.availableAnalysis > 0;
+    if (!hasAvailableAnalysis) {
+      throw new BadRequestException(
+        'You have reached your analysis limit. You can upgrade your subscription plan to create more analyses.',
+      );
+    }
+
     return await this.Analytic.create({
       ...createAnalyticsDto,
       user: user._id,
